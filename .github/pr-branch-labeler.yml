@@ -1,0 +1,13 @@
+# # Head rules
+
+# Apply label "feature" if base matches "feature/*"
+feature:
+  head: ["feature/*"]
+
+# Apply label "bug" if base matches "hotfix/*"
+bug:
+  head: ["hotfix/*"]
+
+# Apply label "tests" if base matches "tests/*"
+tests:
+  head: ["tests/*"]

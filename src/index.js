@@ -1,0 +1,282 @@
+/* @flow */
+import { URL } from "url";
+import fs from "fs";
+import jwt from "jsonwebtoken";
+import NodeRSA from "node-rsa";
+import fetch from "node-fetch";
+
+export type AppleIdTokenType = {
+  /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
+  iss: string,
+  /** The unique identifier for the user. */
+  sub: string,
+  /** Your client_id in your Apple Developer account. */
+  aud: string,
+  /** The expiry time for the token. This value is typically set to five minutes. */
+  exp: string,
+  /** The time the token was issued. */
+  iat: string,
+  /** A String value used to associate a client session and an ID token. This value is used to mitigate replay attacks and is present only if passed during the authorization request. */
+  nonce: string,
+  /** A Boolean value that indicates whether the transaction is on a nonce-supported platform. If you sent a nonce in the authorization request but do not see the nonce claim in the ID token, check this claim to determine how to proceed. If this claim returns true you should treat nonce as mandatory and fail the transaction; otherwise, you can proceed treating the nonce as optional. */
+  nonce_supported: boolean,
+  /** The user's email address. */
+  email: string,
+  /** A Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
+  email_verified: boolean
+};
+
+export type AppleAuthorizationTokenResponseType = {
+  /** A token used to access allowed data. */
+  access_token: string,
+  /** It will always be Bearer. */
+  token_type: "Bearer",
+  /** The amount of time, in seconds, before the access token expires. */
+  expires_in: 3600,
+  /** used to regenerate (new) access tokens. */
+  refresh_token: string,
+  /** A JSON Web Token that contains the user’s identity information. */
+  id_token: string
+};
+
+const ENDPOINT_URL = "https://appleid.apple.com";
+
+/** Apple keys cache - kid: Object */
+const APPLE_KEYS_CACHE = {};
+
+/** Gets the Apple Authorizaion URL */
+const getAuthorizationUrl = (
+  options: {
+    clientID: string,
+    redirectUri: string,
+    state?: string,
+    scope?: string
+  } = {}
+): string => {
+  // Handle input errors
+  if (!options.clientID) {
+    throw Error("clientID is empty");
+  }
+  if (!options.redirectUri) {
+    throw Error("redirectUri is empty");
+  }
+
+  const url = new URL(ENDPOINT_URL);
+  url.pathname = "/auth/authorize";
+
+  url.searchParams.append("response_type", "code");
+  url.searchParams.append("state", options.state || "state");
+  url.searchParams.append("client_id", options.clientID);
+  url.searchParams.append("redirect_uri", options.redirectUri);
+  url.searchParams.append("scope", `openid ${options.scope || "email"}`);
+
+  return url.toString();
+};
+
+/** Gets your Apple clientSecret */
+const getClientSecret = (
+  options: {
+    clientID: string,
+    teamId: string,
+    keyIdentifier: string,
+    privateKeyPath: string,
+    expAfter?: number
+  } = {}
+): string => {
+  // Handle input errors
+  if (!options.clientID) {
+    throw new Error("clientID is empty");
+  }
+  if (!options.teamId) {
+    throw new Error("teamId is empty");
+  }
+  if (!options.keyIdentifier) {
+    throw new Error("keyIdentifier is empty");
+  }
+  if (!options.privateKeyPath) {
+    throw new Error("privateKeyPath is empty");
+  }
+  // if (!fs.existsSync(options.privateKeyPath)) {
+  //   throw new Error("Can't find private key");
+  // }
+
+  const timeNow = Math.floor(Date.now() / 1000);
+
+  const claims = {
+    iss: options.teamId,
+    iat: timeNow,
+    exp: timeNow + (options.expAfter || 15777000), // default to 5 minutes
+    aud: ENDPOINT_URL,
+    sub: options.clientID
+  };
+
+  const header = { alg: "ES256", kid: options.keyIdentifier };
+  const key = fs.readFileSync(options.privateKeyPath);
+
+  return jwt.sign(claims, key, { algorithm: "ES256", header });
+};
+
+/** Gets an Apple authorization token */
+const getAuthorizationToken = async (
+  code: string,
+  options: {
+    clientID: string,
+    redirectUri: string,
+    clientSecret: string
+  }
+): Promise<AppleAuthorizationTokenResponseType> => {
+  // Handle input errors
+  if (!options.clientID) {
+    throw new Error("clientID is empty");
+  }
+  if (!options.redirectUri) {
+    throw new Error("redirectUri is empty");
+  }
+  if (!options.clientSecret) {
+    throw new Error("clientSecret is empty");
+  }
+
+  const url = new URL(ENDPOINT_URL);
+  url.pathname = "/auth/token";
+
+  const form = {
+    client_id: options.clientID,
+    client_secret: options.clientSecret,
+    code,
+    grant_type: "authorization_code",
+    redirect_uri: options.redirectUri
+  };
+
+  return fetch(url.toString(), {
+    method: "POST",
+    body: JSON.stringify(form)
+  }).then(res => res.json());
+};
+
+/** Refreshes an Apple authorization token */
+const refreshAuthorizationToken = async (
+  refreshToken: string,
+  options: {
+    clientID: string,
+    clientSecret: string
+  }
+): Promise<AppleAuthorizationTokenResponseType> => {
+  if (!options.clientID) {
+    throw new Error("clientID is empty");
+  }
+  if (!options.clientSecret) {
+    throw new Error("clientSecret is empty");
+  }
+
+  const url = new URL(ENDPOINT_URL);
+  url.pathname = "/auth/token";
+
+  const form = {
+    client_id: options.clientID,
+    client_secret: options.clientSecret,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token"
+  };
+
+  return fetch(url.toString(), {
+    method: "POST",
+    body: JSON.stringify(form)
+  }).then(res => res.json());
+};
+
+/** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
+const _getApplePublicKeys = async ({
+  disableCaching
+}: { disableCaching?: boolean } = {}): Array<string> => {
+  const url = new URL(ENDPOINT_URL);
+  url.pathname = "/auth/keys";
+
+  const data = await fetch(url.toString(), {
+    method: "GET"
+  }).then(res => res.json());
+
+  const keyValues = data.keys.map(key => {
+    const publKeyObj = new NodeRSA();
+    publKeyObj.importKey(
+      { n: Buffer.from(key.n, "base64"), e: Buffer.from(key.e, "base64") },
+      "components-public"
+    );
+    const publicKey = publKeyObj.exportKey(["public"]);
+
+    // cache keys
+    if (!disableCaching) {
+      APPLE_KEYS_CACHE[key.kid] = publicKey;
+    }
+
+    return publicKey;
+  });
+
+  // Return parsed keys
+  return keyValues;
+};
+
+/** Gets the Apple Public Key corresponding to the JSON's header  */
+const _getIdTokenApplePublicKey = async (
+  header: string,
+  cb: (?Error, ?string) => any
+): Function => {
+  // attempt fetching from cache
+  if (APPLE_KEYS_CACHE[header.kid]) {
+    return cb(null, APPLE_KEYS_CACHE[header.kid]);
+  }
+  // fetch and cache current Apple public keys
+  await _getApplePublicKeys();
+  // attempt fetching from cache
+  if (APPLE_KEYS_CACHE[header.kid]) {
+    return cb(null, APPLE_KEYS_CACHE[header.kid]);
+  }
+  // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
+  return cb(new Error("input error: Invalid id token public key id"));
+};
+
+/** Verifies an Apple id token */
+const verifyIdToken = async (
+  idToken: string,
+  clientID: string | Array<string>
+): Promise<AppleIdTokenType> =>
+  new Promise((resolve, reject) =>
+    jwt.verify(
+      idToken,
+      _getIdTokenApplePublicKey,
+      {
+        algorithms: "RS256",
+        issuer: ENDPOINT_URL
+      },
+      (error: Error, decoded: AppleIdTokenType) => {
+        if (error) {
+          reject(error);
+        }
+
+        // Verify clientID
+        if (
+          clientID &&
+          !(Array.isArray(clientID) ? clientID : [clientID]).includes(
+            decoded.aud
+          )
+        ) {
+          reject(
+            new Error(
+              `input error: aud parameter does not include this client - is: ${decoded.aud} | expected: ${clientID}`
+            )
+          );
+        }
+
+        resolve(decoded);
+      }
+    )
+  );
+
+export default {
+  getAuthorizationUrl,
+  getClientSecret,
+  getAuthorizationToken,
+  refreshAuthorizationToken,
+  verifyIdToken,
+  // Internals - exposed for hacky people
+  _getApplePublicKeys
+};
