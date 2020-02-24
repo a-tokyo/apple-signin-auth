@@ -41,8 +41,8 @@ export type AppleAuthorizationTokenResponseType = {
 
 const ENDPOINT_URL = "https://appleid.apple.com";
 
-/** Apple keys cache - kid: Object */
-const APPLE_KEYS_CACHE = {};
+/** Apple keys cache - { kid: public_key } */
+let APPLE_KEYS_CACHE: {[kid: string]: string} = {};
 
 /** Gets the Apple Authorizaion URL */
 const getAuthorizationUrl = (
@@ -191,11 +191,17 @@ const _getApplePublicKeys = async ({
   const url = new URL(ENDPOINT_URL);
   url.pathname = "/auth/keys";
 
+  // Fetch Apple's Public keys
   const data = await fetch(url.toString(), {
     method: "GET"
   }).then(res => res.json());
 
+  // Reset cache - will be refilled below
+  APPLE_KEYS_CACHE = {};
+
+  // Parse and cache keys
   const keyValues = data.keys.map(key => {
+    // parse key
     const publKeyObj = new NodeRSA();
     publKeyObj.importKey(
       { n: Buffer.from(key.n, "base64"), e: Buffer.from(key.e, "base64") },
@@ -203,11 +209,12 @@ const _getApplePublicKeys = async ({
     );
     const publicKey = publKeyObj.exportKey(["public"]);
 
-    // cache keys
+    // cache key
     if (!disableCaching) {
       APPLE_KEYS_CACHE[key.kid] = publicKey;
     }
 
+    // return public key string
     return publicKey;
   });
 

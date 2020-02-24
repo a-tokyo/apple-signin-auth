@@ -34,13 +34,18 @@ jobs:
       - name: Setup env vars
         id: ownEnvVars
         run: |
+          # Set PACKAGE_VERSION
           PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
           echo ::set-output name=PACKAGE_VERSION::$PACKAGE_VERSION
+          # Set COMMIT_LOG
+          COMMIT_LOG=`git log $(git describe --tags --abbrev=0)..HEAD --date=iso-local --format='%cd %h %an - %s'`
+          echo ::set-output name=COMMIT_LOG::$COMMIT_LOG
       - uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.ownEnvVars.outputs.PACKAGE_VERSION }}
           commit: master
+          body: ${{ steps.ownEnvVars.outputs.COMMIT_LOG }}
       - name: npm publish
         run: npm publish
         env:
