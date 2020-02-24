@@ -1,7 +1,6 @@
 {
-  "name": "apple-signin",
-  "private": true,
-  "version": "0.0.1",
+  "name": "apple-signin-auth",
+  "version": "1.0.0",
   "description": "🍎 Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
