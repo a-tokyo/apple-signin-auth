@@ -1,0 +1,90 @@
+{
+  "name": "apple-signin-auth",
+  "version": "1.0.0",
+  "description": "🍎 Apple signin for node.",
+  "author": {
+    "name": "Ahmed Tarek",
+    "email": "ahmed.tokyo1@gmail.com",
+    "url": "https://github.com/A-Tokyo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a-tokyo/apple-signin.git"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib/"
+  ],
+  "homepage": "https://github.com/a-tokyo/apple-signin#readme",
+  "bugs": {
+    "url": "https://github.com/a-tokyo/apple-signin/issues"
+  },
+  "scripts": {
+    "start": "babel-node src/index.js",
+    "dev": "yarn build --watch",
+    "build": "rm -rf lib && yarn build:flow && yarn build:js",
+    "build:js": "babel src --out-dir lib -s --ignore *.test.js,**/*.test.js",
+    "build:flow": "flow-copy-source -v -i '*.test.js' -i '**/*.test.js' src lib",
+    "prepublish": "export NODE_ENV=production && yarn build",
+    "test": "npm run build && yarn jest"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "node-fetch": "^2.6.0",
+    "node-rsa": "^1.0.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.8.3",
+    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+    "@babel/plugin-transform-react-jsx": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-flow": "^7.8.3",
+    "@testing-library/react-hooks": "^3.2.1",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^25.1.0",
+    "babel-plugin-lodash": "^3.3.4",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-flowtype": "^4.6.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.18.0",
+    "flow-bin": "^0.116.1",
+    "flow-copy-source": "^2.0.9",
+    "husky": "^4.2.1",
+    "jest": "^25.1.0",
+    "jest-cli": "^25.1.0",
+    "lint-staged": "^10.0.2",
+    "prettier": "^1.19.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && eslint . --fix"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --single-quote --trailing-comma es5 --write",
+      "git add"
+    ]
+  },
+  "license": "MIT",
+  "keywords": [
+    "apple",
+    "signin",
+    "login",
+    "auth",
+    "authentication",
+    "node",
+    "jwt",
+    "es6",
+    "flow",
+    "types",
+    "typescript",
+    "node"
+  ]
+}

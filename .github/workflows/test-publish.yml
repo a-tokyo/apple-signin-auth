@@ -1,0 +1,47 @@
+name: Test Release Publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test_release_publish:
+    name: Running tests and releasing to NPM
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ubuntu-latest-node-12.x-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ubuntu-latest-node-12.x-yarn-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+          registry-url: https://registry.npmjs.org/
+      - name: Install
+        run: yarn install
+      - name: Test
+        run: yarn test --ci --bail
+      - name: Build
+        run: NODE_ENV=production yarn build
+      - name: Setup env vars
+        id: ownEnvVars
+        run: |
+          PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
+          echo ::set-output name=PACKAGE_VERSION::$PACKAGE_VERSION
+      - uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.ownEnvVars.outputs.PACKAGE_VERSION }}
+          commit: master
+      - name: npm publish
+        run: npm publish --access restricted
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
