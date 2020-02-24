@@ -1,6 +1,8 @@
-# node-apple-signin
+# apple-signin-auth
 
 🍎 Apple signin for node.
+
+[![npm version](https://badge.fury.io/js/apple-signin-auth.svg)](https://badge.fury.io/js/apple-signin-auth)
 
 ## Prerequisites
 1. You should be enrolled in [Apple Developer Program](https://developer.apple.com/programs/).
@@ -13,10 +15,12 @@ More detail about configuration can be found in [blog post](https://medium.com/@
 
 ## Installation
 
-Install the module using [npm](http://npmjs.com):
-
 ```bash
-npm install --save apple-signin
+npm install --save apple-signin-auth
+```
+OR
+```bash
+yarn add apple-signin-auth
 ```
 
 ## Usage
@@ -24,7 +28,9 @@ npm install --save apple-signin
 ### 1. Get authorization URL
 Start "Sign in with Apple" flow by redirecting user to the authorization URL.
 ```js
-import appleSignin from 'appleSignin'; // or const appleSignin = require('apple-signin');
+import appleSignin from 'apple-signin-auth'; 
+// OR const appleSignin = require('apple-signin-auth');
+// OR import { getAuthorizationUrl } from 'apple-signin-auth';
 
 const options = {
   clientID: 'com.company.app', // Apple Client ID
@@ -119,7 +125,7 @@ try {
 ## Extras
 - Handles apple public keys switching solving this issue https://forums.developer.apple.com/thread/129047
 - Caches Apple's public keys and only refetches when needed
-- ES6 (Can be imported using `import appleSigning from 'apple-signin/src'`)
+- ES6 (Can be imported using `import appleSigning from 'apple-signin-auth/src'`)
 - Flow Types
 
 ## Contributing
