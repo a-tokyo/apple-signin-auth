@@ -1,7 +1,6 @@
 {
-  "name": "apple-signin",
-  "private": true,
-  "version": "0.0.1",
+  "name": "apple-signin-auth",
+  "version": "1.0.0",
   "description": "🍎 Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
@@ -10,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/a-tokyo/apple-signin.git"
+    "url": "https://github.com/a-tokyo/apple-signin-auth.git"
   },
   "main": "lib/index.js",
   "files": [
     "lib/"
   ],
-  "homepage": "https://github.com/a-tokyo/apple-signin#readme",
+  "homepage": "https://github.com/a-tokyo/apple-signin-auth#readme",
   "bugs": {
-    "url": "https://github.com/a-tokyo/apple-signin/issues"
+    "url": "https://github.com/a-tokyo/apple-signin-auth/issues"
   },
   "scripts": {
     "start": "babel-node src/index.js",
