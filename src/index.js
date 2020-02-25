@@ -32,7 +32,7 @@ export type AppleAuthorizationTokenResponseType = {
   /** It will always be Bearer. */
   token_type: "Bearer",
   /** The amount of time, in seconds, before the access token expires. */
-  expires_in: 3600,
+  expires_in: 300,
   /** used to regenerate (new) access tokens. */
   refresh_token: string,
   /** A JSON Web Token that contains the user’s identity information. */
@@ -42,13 +42,14 @@ export type AppleAuthorizationTokenResponseType = {
 const ENDPOINT_URL = "https://appleid.apple.com";
 
 /** Apple keys cache - { kid: public_key } */
-let APPLE_KEYS_CACHE: {[kid: string]: string} = {};
+let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 
 /** Gets the Apple Authorizaion URL */
 const getAuthorizationUrl = (
   options: {
     clientID: string,
     redirectUri: string,
+    responseMode?: 'query' | 'fragment' | 'form_post',
     state?: string,
     scope?: string
   } = {}
@@ -68,7 +69,16 @@ const getAuthorizationUrl = (
   url.searchParams.append("state", options.state || "state");
   url.searchParams.append("client_id", options.clientID);
   url.searchParams.append("redirect_uri", options.redirectUri);
-  url.searchParams.append("scope", `openid ${options.scope || "email"}`);
+  url.searchParams.append("scope", `openid${` ${options.scope}`}`);
+
+  if (options.scope?.includes('email')) {
+    // Force set response_mode to 'form_post' if scope includes email
+    url.searchParams.append("response_mode", 'form_post');
+  } else if (options.responseMode) {
+    // Set response_mode to input responseMode
+    url.searchParams.append("response_mode", options.response_mode);
+  }
+
 
   return url.toString();
 };
@@ -105,7 +115,7 @@ const getClientSecret = (
   const claims = {
     iss: options.teamId,
     iat: timeNow,
-    exp: timeNow + (options.expAfter || 15777000), // default to 5 minutes
+    exp: timeNow + (options.expAfter || 300), // default to 5 minutes
     aud: ENDPOINT_URL,
     sub: options.clientID
   };
@@ -129,9 +139,6 @@ const getAuthorizationToken = async (
   if (!options.clientID) {
     throw new Error("clientID is empty");
   }
-  if (!options.redirectUri) {
-    throw new Error("redirectUri is empty");
-  }
   if (!options.clientSecret) {
     throw new Error("clientSecret is empty");
   }
@@ -146,6 +153,10 @@ const getAuthorizationToken = async (
     grant_type: "authorization_code",
     redirect_uri: options.redirectUri
   };
+
+  if (options.redirectUri) {
+    form.redirect_uri = options.redirectUri;
+  }
 
   return fetch(url.toString(), {
     method: "POST",

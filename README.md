@@ -37,7 +37,8 @@ const options = {
   redirectUri: 'http://localhost:3000/auth/apple/callback',
   // OPTIONAL
   state: 'state', // optional, An unguessable random string. It is primarily used to protect against CSRF attacks.
-  scope: 'email' // optional, default value is 'email'.
+  responseMode: 'query' | 'fragment' | 'form_post', // Force set to form_post if scope includes 'email'
+  scope: 'email' // optional
 };
 
 const authorizationUrl = appleSignin.getAuthorizationUrl(options);
