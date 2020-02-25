@@ -67,12 +67,12 @@ const options = {
   redirectUri: 'http://localhost:3000/auth/apple/callback', // use the same value which you passed to authorisation URL.
   clientSecret: clientSecret
 };
- 
-appleSignin.getAuthorizationToken(code, options).then(tokenResponse => {
-    console.log(tokenResponse);
-}).catch(error => {
-    console.log(error);
-});
+
+try {
+  const tokenResponse = await appleSignin.getAuthorizationToken(code, options);
+} catch (err) {
+  console.error(err);
+}
 ```
 
 Result of ```getAuthorizationToken``` command is a JSON object representing Apple's [TokenResponse](https://developer.apple.com/documentation/signinwithapplerestapi/tokenresponse):
@@ -80,7 +80,7 @@ Result of ```getAuthorizationToken``` command is a JSON object representing Appl
 {
     access_token: 'ACCESS_TOKEN', // A token used to access allowed data.
     token_type: 'Bearer', // It will always be Bearer.
-    expires_in: 3600, // The amount of time, in seconds, before the access token expires.
+    expires_in: 300, // The amount of time, in seconds, before the access token expires.
     refresh_token: 'REFRESH_TOKEN', // used to regenerate new access tokens. Store this token securely on your server.
     id_token: 'ID_TOKEN' // A JSON Web Token that contains the user’s identity information.
 }
@@ -88,13 +88,18 @@ Result of ```getAuthorizationToken``` command is a JSON object representing Appl
 
 ### 3. Verify token signature and get unique user's identifier
 ```js
-const clientID = 'com.company.app'; // or ['com.company.app', 'com.company.app.staging'];
-appleSignin.verifyIdToken(tokenResponse.id_token, clientID).then(result => {
-    const userAppleId = result.sub;
-}).catch(error => {
+try {
+  const { sub: userAppleId } = await appleSignin.verifyIdToken(tokenResponse.id_token, {
+    // Optional Options for further verification - Full list can be found here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
+    audience: 'com.company.app', // client id - can also be an array
+    nonce: 'NONCE', // nonce
+    // If you want to handle expiration on your own, or if you want the expired tokens decoded
+    ignoreExpiration: true, // default is false
+  });
+} catch (err) {
   // Token is not verified
-  console.log(error);
-});
+  console.error(err);
+}
 ```
 
 ### 4. Refresh access token after expiration

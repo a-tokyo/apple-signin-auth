@@ -49,7 +49,7 @@ const getAuthorizationUrl = (
   options: {
     clientID: string,
     redirectUri: string,
-    responseMode?: 'query' | 'fragment' | 'form_post',
+    responseMode?: "query" | "fragment" | "form_post",
     state?: string,
     scope?: string
   } = {}
@@ -71,14 +71,13 @@ const getAuthorizationUrl = (
   url.searchParams.append("redirect_uri", options.redirectUri);
   url.searchParams.append("scope", `openid${` ${options.scope}`}`);
 
-  if (options.scope?.includes('email')) {
+  if (options.scope?.includes("email")) {
     // Force set response_mode to 'form_post' if scope includes email
-    url.searchParams.append("response_mode", 'form_post');
+    url.searchParams.append("response_mode", "form_post");
   } else if (options.responseMode) {
     // Set response_mode to input responseMode
     url.searchParams.append("response_mode", options.response_mode);
   }
-
 
   return url.toString();
 };
@@ -254,8 +253,10 @@ const _getIdTokenApplePublicKey = async (
 
 /** Verifies an Apple id token */
 const verifyIdToken = async (
+  /** id_token provided by Apple post Auth  */
   idToken: string,
-  clientID: string | Array<string>
+  /** JWT verify options - Full list here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback  */
+  options: Object = {},
 ): Promise<AppleIdTokenType> =>
   new Promise((resolve, reject) =>
     jwt.verify(
@@ -263,29 +264,11 @@ const verifyIdToken = async (
       _getIdTokenApplePublicKey,
       {
         algorithms: "RS256",
-        issuer: ENDPOINT_URL
+        issuer: ENDPOINT_URL,
+        ...options,
       },
-      (error: Error, decoded: AppleIdTokenType) => {
-        if (error) {
-          reject(error);
-        }
-
-        // Verify clientID
-        if (
-          clientID &&
-          !(Array.isArray(clientID) ? clientID : [clientID]).includes(
-            decoded.aud
-          )
-        ) {
-          reject(
-            new Error(
-              `input error: aud parameter does not include this client - is: ${decoded.aud} | expected: ${clientID}`
-            )
-          );
-        }
-
-        resolve(decoded);
-      }
+      (error: Error, decoded: AppleIdTokenType) =>
+        error ? reject(error) : resolve(decoded)
     )
   );
 
