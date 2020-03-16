@@ -88,7 +88,8 @@ const getClientSecret = (
     clientID: string,
     teamId: string,
     keyIdentifier: string,
-    privateKeyPath: string,
+    privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
+    privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
     expAfter?: number
   } = {}
 ): string => {
@@ -102,12 +103,17 @@ const getClientSecret = (
   if (!options.keyIdentifier) {
     throw new Error("keyIdentifier is empty");
   }
-  if (!options.privateKeyPath) {
-    throw new Error("privateKeyPath is empty");
+  if (!options.privateKeyPath && !options.privateKey) {
+    throw new Error("privateKey and privateKeyPath are empty");
   }
-  // if (!fs.existsSync(options.privateKeyPath)) {
-  //   throw new Error("Can't find private key");
-  // }
+  if (options.privateKeyPath && options.privateKey) {
+    throw new Error(
+      "privateKey and privateKeyPath cannot be passed together, choose one of them"
+    );
+  }
+  if (options.privateKeyPath && !fs.existsSync(options.privateKeyPath)) {
+    throw new Error("Can't find private key");
+  }
 
   const timeNow = Math.floor(Date.now() / 1000);
 
@@ -120,7 +126,7 @@ const getClientSecret = (
   };
 
   const header = { alg: "ES256", kid: options.keyIdentifier };
-  const key = fs.readFileSync(options.privateKeyPath);
+  const key = options.privateKeyPath ? fs.readFileSync(options.privateKeyPath) : options.privateKey;
 
   return jwt.sign(claims, key, { algorithm: "ES256", header });
 };
@@ -256,7 +262,7 @@ const verifyIdToken = async (
   /** id_token provided by Apple post Auth  */
   idToken: string,
   /** JWT verify options - Full list here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback  */
-  options: Object = {},
+  options: Object = {}
 ): Promise<AppleIdTokenType> =>
   new Promise((resolve, reject) =>
     jwt.verify(
@@ -265,7 +271,7 @@ const verifyIdToken = async (
       {
         algorithms: "RS256",
         issuer: ENDPOINT_URL,
-        ...options,
+        ...options
       },
       (error: Error, decoded: AppleIdTokenType) =>
         error ? reject(error) : resolve(decoded)

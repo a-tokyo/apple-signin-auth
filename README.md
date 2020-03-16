@@ -58,7 +58,7 @@ More detail can be found in [Apple docs](https://developer.apple.com/documentati
 const clientSecret = appleSignin.getClientSecret({
   clientID: 'com.company.app', // Apple Client ID
   teamId: 'teamId', // Apple Developer Team ID.
-  privateKeyPath: '/var/www/app/AuthKey_XXX.p8', // path to private key associated with your client ID.
+  privateKey: 'PRIVATE_KEY_STRING', // path to private key associated with your client ID. -- Can also be `privateKeyPath` string
   keyIdentifier: 'XXX' // identifier of the private key.    
 });
 
@@ -108,7 +108,7 @@ try {
 const clientSecret = appleSignin.getClientSecret({
   clientID: 'com.company.app', // Apple Client ID
   teamId: 'teamId', // Apple Developer Team ID.
-  privateKeyPath: '/var/www/app/AuthKey_XXXXXXXXXX.p8', // path to private key associated with client ID.
+  privateKeyPath: '/var/www/app/AuthKey_XXXXXXXXXX.p8', // path to private key associated with client ID. -- Can also be `privateKey` string
   keyIdentifier: 'XXXXXXXXXX', // identifier of the private key. - can be found here https://developer.apple.com/account/resources/authkeys/list
   // OPTIONAL
   expAfter: 15777000, // Duration after which to expire JWT
