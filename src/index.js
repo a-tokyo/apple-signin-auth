@@ -1,9 +1,9 @@
 /* @flow */
-import { URL } from "url";
-import fs from "fs";
-import jwt from "jsonwebtoken";
-import NodeRSA from "node-rsa";
-import fetch from "node-fetch";
+import { URL } from 'url';
+import fs from 'fs';
+import jwt from 'jsonwebtoken';
+import NodeRSA from 'node-rsa';
+import fetch from 'node-fetch';
 
 export type AppleIdTokenType = {
   /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
@@ -23,23 +23,23 @@ export type AppleIdTokenType = {
   /** The user's email address. */
   email: string,
   /** A Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
-  email_verified: boolean
+  email_verified: boolean,
 };
 
 export type AppleAuthorizationTokenResponseType = {
   /** A token used to access allowed data. */
   access_token: string,
   /** It will always be Bearer. */
-  token_type: "Bearer",
+  token_type: 'Bearer',
   /** The amount of time, in seconds, before the access token expires. */
   expires_in: 300,
   /** used to regenerate (new) access tokens. */
   refresh_token: string,
   /** A JSON Web Token that contains the user’s identity information. */
-  id_token: string
+  id_token: string,
 };
 
-const ENDPOINT_URL = "https://appleid.apple.com";
+const ENDPOINT_URL = 'https://appleid.apple.com';
 
 /** Apple keys cache - { kid: public_key } */
 let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
@@ -49,34 +49,34 @@ const getAuthorizationUrl = (
   options: {
     clientID: string,
     redirectUri: string,
-    responseMode?: "query" | "fragment" | "form_post",
+    responseMode?: 'query' | 'fragment' | 'form_post',
     state?: string,
-    scope?: string
-  } = {}
+    scope?: string,
+  } = {},
 ): string => {
   // Handle input errors
   if (!options.clientID) {
-    throw Error("clientID is empty");
+    throw Error('clientID is empty');
   }
   if (!options.redirectUri) {
-    throw Error("redirectUri is empty");
+    throw Error('redirectUri is empty');
   }
 
   const url = new URL(ENDPOINT_URL);
-  url.pathname = "/auth/authorize";
+  url.pathname = '/auth/authorize';
 
-  url.searchParams.append("response_type", "code");
-  url.searchParams.append("state", options.state || "state");
-  url.searchParams.append("client_id", options.clientID);
-  url.searchParams.append("redirect_uri", options.redirectUri);
-  url.searchParams.append("scope", `openid${` ${options.scope}`}`);
+  url.searchParams.append('response_type', 'code');
+  url.searchParams.append('state', options.state || 'state');
+  url.searchParams.append('client_id', options.clientID);
+  url.searchParams.append('redirect_uri', options.redirectUri);
+  url.searchParams.append('scope', `openid${` ${options.scope}`}`);
 
-  if (options.scope?.includes("email")) {
+  if (options.scope?.includes('email')) {
     // Force set response_mode to 'form_post' if scope includes email
-    url.searchParams.append("response_mode", "form_post");
+    url.searchParams.append('response_mode', 'form_post');
   } else if (options.responseMode) {
     // Set response_mode to input responseMode
-    url.searchParams.append("response_mode", options.response_mode);
+    url.searchParams.append('response_mode', options.response_mode);
   }
 
   return url.toString();
@@ -90,25 +90,25 @@ const getClientSecret = (
     keyIdentifier: string,
     privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
     privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
-    expAfter?: number
-  } = {}
+    expAfter?: number,
+  } = {},
 ): string => {
   // Handle input errors
   if (!options.clientID) {
-    throw new Error("clientID is empty");
+    throw new Error('clientID is empty');
   }
   if (!options.teamId) {
-    throw new Error("teamId is empty");
+    throw new Error('teamId is empty');
   }
   if (!options.keyIdentifier) {
-    throw new Error("keyIdentifier is empty");
+    throw new Error('keyIdentifier is empty');
   }
   if (!options.privateKeyPath && !options.privateKey) {
-    throw new Error("privateKey and privateKeyPath are empty");
+    throw new Error('privateKey and privateKeyPath are empty');
   }
   if (options.privateKeyPath && options.privateKey) {
     throw new Error(
-      "privateKey and privateKeyPath cannot be passed together, choose one of them"
+      'privateKey and privateKeyPath cannot be passed together, choose one of them',
     );
   }
   if (options.privateKeyPath && !fs.existsSync(options.privateKeyPath)) {
@@ -122,13 +122,15 @@ const getClientSecret = (
     iat: timeNow,
     exp: timeNow + (options.expAfter || 300), // default to 5 minutes
     aud: ENDPOINT_URL,
-    sub: options.clientID
+    sub: options.clientID,
   };
 
-  const header = { alg: "ES256", kid: options.keyIdentifier };
-  const key = options.privateKeyPath ? fs.readFileSync(options.privateKeyPath) : options.privateKey;
+  const header = { alg: 'ES256', kid: options.keyIdentifier };
+  const key = options.privateKeyPath
+    ? fs.readFileSync(options.privateKeyPath)
+    : options.privateKey;
 
-  return jwt.sign(claims, key, { algorithm: "ES256", header });
+  return jwt.sign(claims, key, { algorithm: 'ES256', header });
 };
 
 /** Gets an Apple authorization token */
@@ -137,26 +139,26 @@ const getAuthorizationToken = async (
   options: {
     clientID: string,
     redirectUri: string,
-    clientSecret: string
-  }
+    clientSecret: string,
+  },
 ): Promise<AppleAuthorizationTokenResponseType> => {
   // Handle input errors
   if (!options.clientID) {
-    throw new Error("clientID is empty");
+    throw new Error('clientID is empty');
   }
   if (!options.clientSecret) {
-    throw new Error("clientSecret is empty");
+    throw new Error('clientSecret is empty');
   }
 
   const url = new URL(ENDPOINT_URL);
-  url.pathname = "/auth/token";
+  url.pathname = '/auth/token';
 
   const form = {
     client_id: options.clientID,
     client_secret: options.clientSecret,
     code,
-    grant_type: "authorization_code",
-    redirect_uri: options.redirectUri
+    grant_type: 'authorization_code',
+    redirect_uri: options.redirectUri,
   };
 
   if (options.redirectUri) {
@@ -164,9 +166,9 @@ const getAuthorizationToken = async (
   }
 
   return fetch(url.toString(), {
-    method: "POST",
-    body: JSON.stringify(form)
-  }).then(res => res.json());
+    method: 'POST',
+    body: JSON.stringify(form),
+  }).then((res) => res.json());
 };
 
 /** Refreshes an Apple authorization token */
@@ -174,56 +176,56 @@ const refreshAuthorizationToken = async (
   refreshToken: string,
   options: {
     clientID: string,
-    clientSecret: string
-  }
+    clientSecret: string,
+  },
 ): Promise<AppleAuthorizationTokenResponseType> => {
   if (!options.clientID) {
-    throw new Error("clientID is empty");
+    throw new Error('clientID is empty');
   }
   if (!options.clientSecret) {
-    throw new Error("clientSecret is empty");
+    throw new Error('clientSecret is empty');
   }
 
   const url = new URL(ENDPOINT_URL);
-  url.pathname = "/auth/token";
+  url.pathname = '/auth/token';
 
   const form = {
     client_id: options.clientID,
     client_secret: options.clientSecret,
     refresh_token: refreshToken,
-    grant_type: "refresh_token"
+    grant_type: 'refresh_token',
   };
 
   return fetch(url.toString(), {
-    method: "POST",
-    body: JSON.stringify(form)
-  }).then(res => res.json());
+    method: 'POST',
+    body: JSON.stringify(form),
+  }).then((res) => res.json());
 };
 
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
 const _getApplePublicKeys = async ({
-  disableCaching
+  disableCaching,
 }: { disableCaching?: boolean } = {}): Array<string> => {
   const url = new URL(ENDPOINT_URL);
-  url.pathname = "/auth/keys";
+  url.pathname = '/auth/keys';
 
   // Fetch Apple's Public keys
   const data = await fetch(url.toString(), {
-    method: "GET"
-  }).then(res => res.json());
+    method: 'GET',
+  }).then((res) => res.json());
 
   // Reset cache - will be refilled below
   APPLE_KEYS_CACHE = {};
 
   // Parse and cache keys
-  const keyValues = data.keys.map(key => {
+  const keyValues = data.keys.map((key) => {
     // parse key
     const publKeyObj = new NodeRSA();
     publKeyObj.importKey(
-      { n: Buffer.from(key.n, "base64"), e: Buffer.from(key.e, "base64") },
-      "components-public"
+      { n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') },
+      'components-public',
     );
-    const publicKey = publKeyObj.exportKey(["public"]);
+    const publicKey = publKeyObj.exportKey(['public']);
 
     // cache key
     if (!disableCaching) {
@@ -241,7 +243,7 @@ const _getApplePublicKeys = async ({
 /** Gets the Apple Public Key corresponding to the JSON's header  */
 const _getIdTokenApplePublicKey = async (
   header: string,
-  cb: (?Error, ?string) => any
+  cb: (?Error, ?string) => any,
 ): Function => {
   // attempt fetching from cache
   if (APPLE_KEYS_CACHE[header.kid]) {
@@ -254,7 +256,7 @@ const _getIdTokenApplePublicKey = async (
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
   // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
-  return cb(new Error("input error: Invalid id token public key id"));
+  return cb(new Error('input error: Invalid id token public key id'));
 };
 
 /** Verifies an Apple id token */
@@ -262,20 +264,20 @@ const verifyIdToken = async (
   /** id_token provided by Apple post Auth  */
   idToken: string,
   /** JWT verify options - Full list here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback  */
-  options: Object = {}
+  options: Object = {},
 ): Promise<AppleIdTokenType> =>
   new Promise((resolve, reject) =>
     jwt.verify(
       idToken,
       _getIdTokenApplePublicKey,
       {
-        algorithms: "RS256",
+        algorithms: 'RS256',
         issuer: ENDPOINT_URL,
-        ...options
+        ...options,
       },
       (error: Error, decoded: AppleIdTokenType) =>
-        error ? reject(error) : resolve(decoded)
-    )
+        error ? reject(error) : resolve(decoded),
+    ),
   );
 
 export default {
@@ -285,5 +287,5 @@ export default {
   refreshAuthorizationToken,
   verifyIdToken,
   // Internals - exposed for hacky people
-  _getApplePublicKeys
+  _getApplePublicKeys,
 };
