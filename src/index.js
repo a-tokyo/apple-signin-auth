@@ -280,6 +280,17 @@ const verifyIdToken = async (
     ),
   );
 
+export {
+  getAuthorizationUrl,
+  getClientSecret,
+  getAuthorizationToken,
+  refreshAuthorizationToken,
+  verifyIdToken,
+  // Internals - exposed for hacky people
+  _getApplePublicKeys,
+};
+
+/* For backwards compatibility with es5 */
 export default {
   getAuthorizationUrl,
   getClientSecret,
