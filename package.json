@@ -1,6 +1,6 @@
 {
   "name": "apple-signin-auth",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "🍎 Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
@@ -43,7 +43,7 @@
     "@babel/preset-flow": "^7.9.0",
     "@testing-library/react-hooks": "^3.2.1",
     "babel-eslint": "^10.1.0",
-    "babel-jest": "^25.2.6",
+    "babel-jest": "^26.1.0",
     "babel-plugin-lodash": "^3.3.4",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
@@ -56,10 +56,10 @@
     "flow-bin": "^0.130.0",
     "flow-copy-source": "^2.0.9",
     "husky": "^4.2.3",
-    "jest": "^25.2.7",
-    "jest-cli": "^25.2.7",
+    "jest": "^26.1.0",
+    "jest-cli": "^26.1.0",
     "lint-staged": "^10.2.11",
-    "prettier": "2.0.2"
+    "prettier": "2.0.5"
   },
   "husky": {
     "hooks": {
