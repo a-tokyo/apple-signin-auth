@@ -1,6 +1,6 @@
 {
   "name": "apple-signin-auth",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "🍎 Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
@@ -37,7 +37,7 @@
     "@babel/cli": "^7.8.4",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.8.3",
-    "@babel/plugin-proposal-optional-chaining": "^7.9.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
     "@babel/plugin-transform-react-jsx": "^7.9.4",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-flow": "^7.9.0",
@@ -49,16 +49,16 @@
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-flowtype": "^4.6.0",
-    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.18.0",
-    "flow-bin": "^0.122.0",
+    "flow-bin": "^0.130.0",
     "flow-copy-source": "^2.0.9",
     "husky": "^4.2.3",
     "jest": "^26.1.0",
     "jest-cli": "^26.1.0",
-    "lint-staged": "^10.1.2",
+    "lint-staged": "^10.2.11",
     "prettier": "2.0.5"
   },
   "husky": {
