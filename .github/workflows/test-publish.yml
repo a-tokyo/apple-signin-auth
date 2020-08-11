@@ -3,7 +3,7 @@ name: Test Release Publish
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test_release_publish:
@@ -44,7 +44,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.ownEnvVars.outputs.PACKAGE_VERSION }}
-          commit: master
+          commit: main
           body: ${{ steps.ownEnvVars.outputs.COMMIT_LOG }}
       - name: npm publish
         run: npm publish
