@@ -16,7 +16,8 @@ https://developer.apple.com/sign-in-with-apple/get-started/) related to "Sign in
 3. You should create App ID and Service ID in your Apple Developer Account.
 4. You should generate private key for your Service ID in your Apple Developer Account.
 
-More detail about configuration can be found in [blog post](https://medium.com/@artyomefremov/add-sign-in-with-apple-button-to-your-website-today-part-1-12ed1444623a?postPublishedType=initial) and [Apple docs](https://help.apple.com/developer-account/#/dev1c0e25352).
+## Apple Signin Setup
+Deatiled confuguration instructions can be found at [blog post](https://medium.com/@artyomefremov/add-sign-in-with-apple-button-to-your-website-today-part-1-12ed1444623a?postPublishedType=initial) and [Apple docs](https://help.apple.com/developer-account/#/dev1c0e25352).
 
 ## Installation
 
@@ -140,7 +141,7 @@ try {
 - Flow Types
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are highly appreciated! For major changes, please open an issue first to discuss what you would like to change.
 
-## Credits
-This is highly inspired by https://github.com/Techofficer/node-apple-signin and a merge would b amazing!
+## Support
+Feel free to <a href="mailto:ahmed.tokyo1@gmail.com?subject=Apple Signin Contact">contact me directly</a> with questions or consultancy requests.
