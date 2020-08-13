@@ -3,7 +3,12 @@ import { URL } from 'url';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import NodeRSA from 'node-rsa';
-import fetch from 'node-fetch';
+import rawFetch from 'node-fetch';
+
+/**
+ * Fetch function
+ */
+let fetch = rawFetch;
 
 export type AppleIdTokenType = {
   /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
@@ -283,6 +288,15 @@ const verifyIdToken = async (
     ),
   );
 
+/**
+ * Sets the fetch function
+ *
+ * Can be used to pass a proxy fetch function or to override headers and params
+ */
+const _setFetch = (fetchFn: Function) => {
+  fetch = fetchFn;
+};
+
 export {
   getAuthorizationUrl,
   getClientSecret,
@@ -291,6 +305,7 @@ export {
   verifyIdToken,
   // Internals - exposed for hacky people
   _getApplePublicKeys,
+  _setFetch,
 };
 
 /* For backwards compatibility with es5 */
@@ -302,4 +317,5 @@ export default {
   verifyIdToken,
   // Internals - exposed for hacky people
   _getApplePublicKeys,
+  _setFetch,
 };
