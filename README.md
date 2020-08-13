@@ -2,7 +2,7 @@
 
  Apple signin for Node.js.
 
-<a href="https://npmjs.com/package/apple-auth">
+<a href="https://npmjs.com/package/apple-sigin-auth">
   <img src="https://img.shields.io/npm/v/apple-signin-auth.svg"></img>
   <img src="https://img.shields.io/npm/dt/apple-signin-auth.svg"></img>
 </a>
