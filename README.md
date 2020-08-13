@@ -1,12 +1,12 @@
 # apple-signin-auth
 
-🍎 Apple signin for Node.js.
+ Apple signin for Node.js.
 
 <a href="https://npmjs.com/package/apple-auth">
   <img src="https://img.shields.io/npm/v/apple-signin-auth.svg"></img>
   <img src="https://img.shields.io/npm/dt/apple-signin-auth.svg"></img>
 </a>
-<a href="https://twitter.com/intent/follow?screen_name=ahmad_tokyo"><img src="https://img.shields.io/twitter/follow/ananayarora.svg?label=Follow%20@ahmad_tokyo" alt="Follow @ahmad_tokyo"></img></a>
+<a href="https://twitter.com/intent/follow?screen_name=ahmad_tokyo"><img src="https://img.shields.io/twitter/follow/ahmad_tokyo.svg?label=Follow%20@ahmad_tokyo" alt="Follow @ahmad_tokyo"></img></a>
 
 
 ## Prerequisites
