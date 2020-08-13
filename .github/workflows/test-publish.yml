@@ -38,7 +38,7 @@ jobs:
           PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
           echo ::set-output name=PACKAGE_VERSION::$PACKAGE_VERSION
           # Set COMMIT_LOG
-          COMMIT_LOG=`git log $(git describe --tags --abbrev=0)..HEAD --date=iso-local --format='%cd %h %an - %s'`
+          COMMIT_LOG=`git log $(git describe --tags --abbrev=0)..HEAD --format='%s - %an'`
           echo ::set-output name=COMMIT_LOG::$COMMIT_LOG
       - uses: ncipollo/release-action@v1
         with:
