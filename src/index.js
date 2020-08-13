@@ -91,7 +91,7 @@ const getAuthorizationUrl = (
 const getClientSecret = (
   options: {
     clientID: string,
-    teamId: string,
+    teamID: string,
     keyIdentifier: string,
     privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
     privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
@@ -102,8 +102,8 @@ const getClientSecret = (
   if (!options.clientID) {
     throw new Error('clientID is empty');
   }
-  if (!options.teamId) {
-    throw new Error('teamId is empty');
+  if (!options.teamID) {
+    throw new Error('teamID is empty');
   }
   if (!options.keyIdentifier) {
     throw new Error('keyIdentifier is empty');
@@ -123,7 +123,7 @@ const getClientSecret = (
   const timeNow = Math.floor(Date.now() / 1000);
 
   const claims = {
-    iss: options.teamId,
+    iss: options.teamID,
     iat: timeNow,
     exp: timeNow + (options.expAfter || 300), // default to 5 minutes
     aud: ENDPOINT_URL,
@@ -158,21 +158,18 @@ const getAuthorizationToken = async (
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/token';
 
-  const form = {
-    client_id: options.clientID,
-    client_secret: options.clientSecret,
-    code,
-    grant_type: 'authorization_code',
-    redirect_uri: options.redirectUri,
-  };
-
+  const params = new URLSearchParams();
+  params.append('client_id', options.clientID);
+  params.append('client_secret', options.clientSecret);
+  params.append('code', code);
+  params.append('grant_type', 'authorization_code');
   if (options.redirectUri) {
-    form.redirect_uri = options.redirectUri;
+    params.append('redirect_uri', options.redirectUri);
   }
 
   return fetch(url.toString(), {
     method: 'POST',
-    body: JSON.stringify(form),
+    body: params,
   }).then((res) => res.json());
 };
 
@@ -194,16 +191,15 @@ const refreshAuthorizationToken = async (
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/token';
 
-  const form = {
-    client_id: options.clientID,
-    client_secret: options.clientSecret,
-    refresh_token: refreshToken,
-    grant_type: 'refresh_token',
-  };
+  const params = new URLSearchParams();
+  params.append('client_id', options.clientID);
+  params.append('client_secret', options.clientSecret);
+  params.append('refresh_token', refreshToken);
+  params.append('grant_type', 'refresh_token');
 
   return fetch(url.toString(), {
     method: 'POST',
-    body: JSON.stringify(form),
+    body: params,
   }).then((res) => res.json());
 };
 
