@@ -41,13 +41,6 @@ export type AppleAuthorizationTokenResponseType = {
 
 const ENDPOINT_URL = 'https://appleid.apple.com';
 
-/**
- * Common request headers
- */
-const COMMON_HEADERS = {
-  'Content-Type': 'application/json',
-};
-
 /** Apple keys cache - { kid: public_key } */
 let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 
@@ -175,7 +168,6 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: JSON.stringify(form),
-    headers: COMMON_HEADERS,
   }).then((res) => res.json());
 };
 
@@ -207,7 +199,6 @@ const refreshAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: JSON.stringify(form),
-    headers: COMMON_HEADERS,
   }).then((res) => res.json());
 };
 
@@ -221,6 +212,9 @@ const _getApplePublicKeys = async ({
   // Fetch Apple's Public keys
   const data = await fetch(url.toString(), {
     method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   }).then((res) => res.json());
 
   // Reset cache - will be refilled below
