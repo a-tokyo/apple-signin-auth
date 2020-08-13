@@ -34,7 +34,7 @@ yarn add apple-signin-auth
 ### 1. Get authorization URL
 Start "Sign in with Apple" flow by redirecting user to the authorization URL.
 ```js
-import appleSignin from 'apple-signin-auth'; 
+import appleSignin from 'apple-signin-auth';
 // OR const appleSignin = require('apple-signin-auth');
 // OR import { getAuthorizationUrl } from 'apple-signin-auth';
 
@@ -65,7 +65,7 @@ const clientSecret = appleSignin.getClientSecret({
   clientID: 'com.company.app', // Apple Client ID
   teamId: 'teamId', // Apple Developer Team ID.
   privateKey: 'PRIVATE_KEY_STRING', // path to private key associated with your client ID. -- Can also be `privateKeyPath` string
-  keyIdentifier: 'XXX' // identifier of the private key.    
+  keyIdentifier: 'XXX' // identifier of the private key.
 });
 
 const options = {
@@ -124,7 +124,7 @@ const options = {
   clientID: 'com.company.app', // Apple Client ID
   clientSecret
 };
- 
+
 try {
   const {
     access_token
@@ -133,6 +133,9 @@ try {
   console.error(err);
 }
 ```
+
+### Extra API functions
+- _setFetch: `(fetchFn: function) => void` - Sets the fetch function, defaults to node-fetch. eg: appleSigninAuth._setFetch(fetchWithProxy);
 
 ## Extras
 - Handles apple public keys switching solving this issue https://forums.developer.apple.com/thread/129047
