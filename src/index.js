@@ -91,7 +91,7 @@ const getAuthorizationUrl = (
 const getClientSecret = (
   options: {
     clientID: string,
-    teamId: string,
+    teamID: string,
     keyIdentifier: string,
     privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
     privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
@@ -102,8 +102,8 @@ const getClientSecret = (
   if (!options.clientID) {
     throw new Error('clientID is empty');
   }
-  if (!options.teamId) {
-    throw new Error('teamId is empty');
+  if (!options.teamID) {
+    throw new Error('teamID is empty');
   }
   if (!options.keyIdentifier) {
     throw new Error('keyIdentifier is empty');
@@ -123,7 +123,7 @@ const getClientSecret = (
   const timeNow = Math.floor(Date.now() / 1000);
 
   const claims = {
-    iss: options.teamId,
+    iss: options.teamID,
     iat: timeNow,
     exp: timeNow + (options.expAfter || 300), // default to 5 minutes
     aud: ENDPOINT_URL,
