@@ -143,6 +143,9 @@ try {
 - ES6 (Can be imported using `import appleSigning from 'apple-signin-auth/src'`)
 - Flow Types
 
+## Helpful resources
+- [React Native: Sign in with Apple by Ross Bulat](https://medium.com/@rossbulat/react-native-sign-in-with-apple-75733d3fbc3)
+
 ## Contributing
 Pull requests are highly appreciated! For major changes, please open an issue first to discuss what you would like to change.
 
