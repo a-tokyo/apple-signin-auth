@@ -141,7 +141,7 @@ try {
 - Handles apple public keys switching solving this issue https://forums.developer.apple.com/thread/129047
 - Caches Apple's public keys and only refetches when needed
 - ES6 (Can be imported using `import appleSigning from 'apple-signin-auth/src'`)
-- Flow Types
+- Flow and TypeScript Types
 
 ## Helpful resources
 - [React Native: Sign in with Apple by Ross Bulat](https://medium.com/@rossbulat/react-native-sign-in-with-apple-75733d3fbc3)
