@@ -29,6 +29,8 @@ jobs:
         run: yarn install
       - name: Test
         run: yarn test --ci --bail
+      - name: Test TypeScript Type Definitions
+        run: yarn test:typescript
       - name: Build
         run: NODE_ENV=production yarn build
       - name: Setup env vars

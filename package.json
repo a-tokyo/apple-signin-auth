@@ -1,6 +1,6 @@
 {
   "name": "apple-signin-auth",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": " Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
@@ -12,6 +12,7 @@
     "url": "https://github.com/a-tokyo/apple-signin-auth.git"
   },
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib/"
   ],
@@ -22,11 +23,19 @@
   "scripts": {
     "start": "babel-node src/index.js",
     "dev": "yarn build --watch",
-    "build": "rm -rf lib && yarn build:flow && yarn build:js",
+    "build": "rm -rf lib && yarn build:flow && yarn build:js && yarn build:typescript",
     "build:js": "babel src --out-dir lib -s --ignore *.test.js,**/*.test.js",
     "build:flow": "flow-copy-source -v -i '*.test.js' -i '**/*.test.js' src lib",
+    "build:typescript": "cp typescript/index.d.ts lib",
     "prepublish": "export NODE_ENV=production && yarn build",
-    "test": "npm run build && yarn jest"
+    "test": "npm run build && yarn jest",
+    "test:typescript": "dtslint --localTs node_modules/typescript/lib --expectOnly typescript"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/typescript/",
+      "<rootDir>/node_modules/"
+    ]
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
@@ -45,6 +54,7 @@
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.3.0",
     "babel-plugin-lodash": "^3.3.4",
+    "dtslint": "^4.0.2",
     "eslint": "^7.6.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-prettier": "^6.11.0",
@@ -59,7 +69,8 @@
     "jest": "^26.4.0",
     "jest-cli": "^26.4.0",
     "lint-staged": "^10.2.11",
-    "prettier": "2.1.1"
+    "prettier": "2.1.1",
+    "typescript": "^4.0.3"
   },
   "husky": {
     "hooks": {
