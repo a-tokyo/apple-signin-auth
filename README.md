@@ -150,7 +150,7 @@ try {
 ## Helpful resources
 - [React Native: Sign in with Apple by Ross Bulat](https://medium.com/@rossbulat/react-native-sign-in-with-apple-75733d3fbc3)
 - [Web: Signin with Apple](https://dev.to/onygami/how-to-add-signin-with-apple-on-your-website-43m9)
-  - Note that the frontend implementation can be replaces with using [Apple Signin for web (React/Vue)](https://github.com/A-Tokyo/react-apple-signin).
+  - Note that the frontend implementation can be replaced with [Apple Signin for web (React/Vue)](https://github.com/A-Tokyo/react-apple-signin).
 
 
 ## Contributing
