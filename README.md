@@ -157,6 +157,3 @@ try {
 
 ## Contributing
 Pull requests are highly appreciated! For major changes, please open an issue first to discuss what you would like to change.
-
-## Support
-Feel free to <a href="mailto:ahmed.tokyo1@gmail.com?subject=Apple Signin Contact">contact me directly</a> with questions or consultancy requests.
