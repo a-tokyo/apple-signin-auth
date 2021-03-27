@@ -64,7 +64,7 @@ More detail can be found in [Apple docs](https://developer.apple.com/documentati
 const clientSecret = appleSignin.getClientSecret({
   clientID: 'com.company.app', // Apple Client ID
   teamID: 'teamID', // Apple Developer Team ID.
-  privateKey: 'PRIVATE_KEY_STRING', // path to private key associated with your client ID. -- Can also be `privateKeyPath` string
+  privateKey: 'PRIVATE_KEY_STRING', // private key associated with your client ID. -- Or provide a `privateKeyPath` property instead.
   keyIdentifier: 'XXX', // identifier of the private key.
   // OPTIONAL
   expAfter: 15777000, // Unix time in seconds after which to expire the clientSecret JWT. Default is now+5 minutes.
