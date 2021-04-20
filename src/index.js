@@ -27,8 +27,10 @@ export type AppleIdTokenType = {
   nonce_supported: boolean,
   /** The user's email address. */
   email: string,
-  /** A Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
-  email_verified: boolean,
+  /** A String or Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
+  email_verified: 'true' | 'false' | boolean,
+  /** A String or Boolean value that indicates whether the email shared by the user is the proxy address. */
+  is_private_email: 'true' | 'false' | boolean,
 };
 
 export type AppleWebhookTokenEventType = {
