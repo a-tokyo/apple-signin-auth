@@ -7,6 +7,7 @@ import appleSignin, {
   getAuthorizationToken,
   refreshAuthorizationToken,
   verifyIdToken,
+  verifyWebhookToken,
   _getApplePublicKeys,
 } from '../src/index';
 
@@ -17,6 +18,7 @@ describe('appleSignin test', () => {
     expect(appleSignin.getAuthorizationToken).toBeTruthy();
     expect(appleSignin.refreshAuthorizationToken).toBeTruthy();
     expect(appleSignin.verifyIdToken).toBeTruthy();
+    expect(appleSignin.verifyWebhookToken).toBeTruthy();
     expect(appleSignin._getApplePublicKeys).toBeTruthy();
   });
 
@@ -26,6 +28,7 @@ describe('appleSignin test', () => {
     expect(getAuthorizationToken).toBeTruthy();
     expect(refreshAuthorizationToken).toBeTruthy();
     expect(verifyIdToken).toBeTruthy();
+    expect(verifyWebhookToken).toBeTruthy();
     expect(_getApplePublicKeys).toBeTruthy();
   });
 });

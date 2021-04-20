@@ -136,6 +136,98 @@ try {
 }
 ```
 
+### Optional: Server-to-Server Notifications
+
+Apple provides realtime server-to-server notifications of several user lifecycle
+events:
+
+- `email-disabled`: The user hides their email behind Apple's private email
+  relay, and has opted to stop having emails forwarded by the private relay
+  service.
+- `email-enabled`: The user hides their email behind Apple's private email
+  relay, and has opted to resume having emails forwarded by the private relay
+  service.
+- `consent-revoked`: The user has decided to stop using Apple ID with your
+  application, e.g. by disconnecting the application from Settings. This should
+  be treated as a sign-out out by the user.
+- `account-delete`: The user has asked Apple to permanently delete their Apple
+  ID. The user identifier is no longer valid.
+
+Notifications are sent for each app group.
+
+The notification is sent as a `POST` request with a JSON body. The request body
+contains a JWT, with the event description on the JWT payload.
+
+```json
+{
+  "payload": "<server-to-server notification JWT>"
+}
+```
+
+To receive these notifications, you must do the following steps.
+
+#### 1. Host the webhook
+
+```js
+app.get("/apple-signin-webhook", async (req, res) => {
+  try {
+    const { events } = await appleSignin.verifyWebhookToken(
+      req.body.payload,
+      {
+        // Optional Options for further verification - Full list can be found here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
+        audience: 'com.company.app', // client id - can also be an array
+      },
+    );
+    const {
+      sub: userAppleId,
+      type,
+      email // Only provided for email events
+    } = events;
+
+    switch (type) {
+      case 'email-disabled':
+        // Email will no longer be forwarded to the user via the private relay service
+        break;
+      case 'email-enabled':
+        // Email will be forwarded to the user again
+        break;
+      case 'consent-revoked':
+        // The user has decided to stop using Apple ID with this application - log them out
+        break;
+      case 'account-delete':
+        // The user has deleted their Apple ID
+        break;
+    }
+
+    res.sendStatus(200);
+} catch (e) {
+  // Event token is not verified
+  console.error(err)
+  res.sendStatus(500);
+});
+```
+
+Note:
+
+- TLS 1.2 is required to receive notifications at the specified endpoint.
+
+#### 2. Configure the webhook URL in the Apple Developer console
+
+2.1. Sign in to Apple Developer, go to "Certificates, Identifiers & Profiles",
+and select the Primary App ID for your application.
+
+2.2 Enable the "Sign in with Apple" capability (if not already enabled) and
+click "Configure" (or "Edit").
+
+2.3 Under "Server to Server Notification Endpoint", enter the fully-qualified
+URL for your webhook, e.g. `https://example.com/api/apple-signin-webhook`,
+and save the changes.
+
+Notes:
+
+- A server-to-server webhook can only be configured for a Primary App ID.
+- The Apple docs for this step are located [here](https://help.apple.com/developer-account/?lang=en#/dev217f824b6).
+
 ### Extra API functions
 - _setFetch: `(fetchFn: function) => void` - Sets the fetch function, defaults to node-fetch. eg: appleSigninAuth._setFetch(fetchWithProxy);
 
