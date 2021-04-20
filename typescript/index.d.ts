@@ -15,8 +15,42 @@ export interface AppleIdTokenType {
   nonce_supported: boolean;
   /** The user's email address. */
   email: string;
-  /** A Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
-  email_verified: boolean;
+  /** A String or Boolean value that indicates whether the service has verified the email. The value of this claim is always true because the servers only return verified email addresses. */
+  email_verified: 'true' | 'false' | boolean;
+  /** A String or Boolean value that indicates whether the email shared by the user is the proxy address. */
+  is_private_email: 'true' | 'false' | boolean;
+}
+
+export interface AppleWebhookTokenEventType {
+  /** The type of event. */
+  type:
+    | 'email-disabled'
+    | 'email-enabled'
+    | 'consent-revoked'
+    | 'account-delete';
+  /** The unique identifier for the user. */
+  sub: string;
+  /** The time the event occurred. */
+  event_time: number;
+  /** The email address for the user. Provided on `email-disabled` and `email-enabled` events only. */
+  email?: string;
+  /** A String or Boolean value that indicates whether the email shared by the user is the proxy address. The value of this claim is always true because the email events relate only to the user's private relay service forwarding preferences. Provided on `email-disabled` and `email-enabled` events only. */
+  is_private_email?: 'true' | 'false' | boolean;
+}
+
+export interface AppleWebhookTokenType {
+  /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
+  iss: string;
+  /** Your client_id in your Apple Developer account. */
+  aud: string;
+  /** The expiry time for the token. This value is typically set to five minutes. */
+  exp: string;
+  /** The time the token was issued. */
+  iat: string;
+  /** The unique identifier for this token. */
+  jti: string;
+  /** The event description. */
+  events: AppleWebhookTokenEventType;
 }
 
 export interface AppleAuthorizationTokenResponseType {
@@ -89,6 +123,16 @@ declare function verifyIdToken(
 ): Promise<AppleIdTokenType>;
 
 /**
+ * Verifies an Apple server-to-server notification token
+ */
+declare function verifyWebhookToken(
+  /** payload provided by Apple server-to-server notification  */
+  webhookToken: string,
+  /** JWT verify options - Full list here https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback  */
+  options?: {},
+): Promise<AppleWebhookTokenType>;
+
+/**
  * Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens
  */
 declare function _getApplePublicKeys(options?: {
@@ -108,6 +152,7 @@ export {
   getClientSecret,
   refreshAuthorizationToken,
   verifyIdToken,
+  verifyWebhookToken,
   _getApplePublicKeys,
   _setFetch,
 };
@@ -118,6 +163,7 @@ declare const _exports: {
   getClientSecret: typeof getClientSecret;
   refreshAuthorizationToken: typeof refreshAuthorizationToken;
   verifyIdToken: typeof verifyIdToken;
+  verifyWebhookToken: typeof verifyWebhookToken;
   _getApplePublicKeys: typeof _getApplePublicKeys;
   _setFetch: typeof _setFetch;
 };
