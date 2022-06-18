@@ -136,6 +136,32 @@ try {
 }
 ```
 
+### 5. Revoke tokens
+```js
+
+const clientSecret = appleSignin.getClientSecret({
+  clientID: 'com.company.app', // Apple Client ID
+  teamID: 'teamID', // Apple Developer Team ID.
+  privateKey: 'PRIVATE_KEY_STRING', // private key associated with your client ID. -- Or provide a `privateKeyPath` property instead.
+  keyIdentifier: 'XXXXXXXXXX', // identifier of the private key. - can be found here https://developer.apple.com/account/resources/authkeys/list
+  // OPTIONAL
+  expAfter: 15777000, // Duration after which to expire JWT
+});
+
+const options = {
+  clientID: 'com.company.app', // Apple Client ID
+  clientSecret
+};
+
+try {
+  const {
+    response
+  } = appleSignin.revokeAuthorizationToken(refreshToken, options);
+} catch (err) {
+  console.error(err);
+}
+```
+
 ### Optional: Server-to-Server Notifications
 
 Apple provides realtime server-to-server notifications of several user lifecycle
