@@ -253,6 +253,36 @@ const refreshAuthorizationToken = async (
   }).then((res) => res.json());
 };
 
+/** Revoke Apple authorization token */
+const revokeAuthorizationToken = async (
+  refreshToken: string,
+  options: {
+    clientID: string,
+    clientSecret: string,
+  },
+): Promise<AppleAuthorizationTokenResponseType> => {
+  if (!options.clientID) {
+    throw new Error('clientID is empty');
+  }
+  if (!options.clientSecret) {
+    throw new Error('clientSecret is empty');
+  }
+
+  const url = new URL(ENDPOINT_URL);
+  url.pathname = '/auth/revoke';
+
+  const params = new URLSearchParams();
+  params.append('client_id', options.clientID);
+  params.append('client_secret', options.clientSecret);
+  params.append('refresh_token', refreshToken);
+  params.append('token_hint_type', 'refresh_token');
+
+  return fetch(url.toString(), {
+    method: 'POST',
+    body: params,
+  }).then((res) => res.json());
+};
+
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
 const _getApplePublicKeys = async ({
   disableCaching,
@@ -370,6 +400,7 @@ export {
   getClientSecret,
   getAuthorizationToken,
   refreshAuthorizationToken,
+  revokeAuthorizationToken,
   verifyIdToken,
   verifyWebhookToken,
   // Internals - exposed for hacky people
@@ -383,6 +414,7 @@ export default {
   getClientSecret,
   getAuthorizationToken,
   refreshAuthorizationToken,
+  revokeAuthorizationToken,
   verifyIdToken,
   verifyWebhookToken,
   // Internals - exposed for hacky people
