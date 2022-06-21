@@ -255,12 +255,13 @@ const refreshAuthorizationToken = async (
 
 /** Revoke Apple authorization token */
 const revokeAuthorizationToken = async (
-  refreshToken: string,
+  token: string,
   options: {
     clientID: string,
     clientSecret: string,
+    tokenHintType: 'refresh_token' | 'access_token'
   },
-): Promise<AppleAuthorizationTokenResponseType> => {
+): Promise<any> => {
   if (!options.clientID) {
     throw new Error('clientID is empty');
   }
@@ -274,8 +275,8 @@ const revokeAuthorizationToken = async (
   const params = new URLSearchParams();
   params.append('client_id', options.clientID);
   params.append('client_secret', options.clientSecret);
-  params.append('refresh_token', refreshToken);
-  params.append('token_hint_type', 'refresh_token');
+  params.append('token', token);
+  params.append('token_hint_type', options.tokenHintType);
 
   return fetch(url.toString(), {
     method: 'POST',
