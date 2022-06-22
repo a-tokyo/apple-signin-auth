@@ -136,7 +136,7 @@ try {
 }
 ```
 
-### 5. Revoke tokens
+### 5. a, Revoke tokens with refresh_token
 ```js
 
 const clientSecret = appleSignin.getClientSecret({
@@ -150,13 +150,37 @@ const clientSecret = appleSignin.getClientSecret({
 
 const options = {
   clientID: 'com.company.app', // Apple Client ID
-  clientSecret
+  clientSecret,
+  tokenHintType: 'refresh_token'
 };
 
 try {
-  const {
-    response
-  } = appleSignin.revokeAuthorizationToken(refreshToken, options);
+  await appleSignin.revokeAuthorizationToken(refreshToken, options);
+} catch (err) {
+  console.error(err);
+}
+```
+
+### 5. b, Revoke tokens with access_token
+```js
+
+const clientSecret = appleSignin.getClientSecret({
+  clientID: 'com.company.app', // Apple Client ID
+  teamID: 'teamID', // Apple Developer Team ID.
+  privateKey: 'PRIVATE_KEY_STRING', // private key associated with your client ID. -- Or provide a `privateKeyPath` property instead.
+  keyIdentifier: 'XXXXXXXXXX', // identifier of the private key. - can be found here https://developer.apple.com/account/resources/authkeys/list
+  // OPTIONAL
+  expAfter: 15777000, // Duration after which to expire JWT
+});
+
+const options = {
+  clientID: 'com.company.app', // Apple Client ID
+  clientSecret,
+  tokenHintType: 'access_token'
+};
+
+try {
+  await appleSignin.revokeAuthorizationToken(accessToken, options);
 } catch (err) {
   console.error(err);
 }
