@@ -113,6 +113,18 @@ declare function refreshAuthorizationToken(
 ): Promise<AppleAuthorizationTokenResponseType>;
 
 /**
+ * Revoke Apple authorization tokens
+ */
+declare function revokeAuthorizationToken(
+  token: string,
+  options: {
+    clientID: string;
+    clientSecret: string;
+    tokenHintType: 'refresh_token' | 'access_token';
+  },
+): Promise<any>;
+
+/**
  * Verifies an Apple id token
  */
 declare function verifyIdToken(
@@ -151,6 +163,7 @@ export {
   getAuthorizationUrl,
   getClientSecret,
   refreshAuthorizationToken,
+  revokeAuthorizationToken,
   verifyIdToken,
   verifyWebhookToken,
   _getApplePublicKeys,
@@ -162,6 +175,7 @@ declare const _exports: {
   getAuthorizationUrl: typeof getAuthorizationUrl;
   getClientSecret: typeof getClientSecret;
   refreshAuthorizationToken: typeof refreshAuthorizationToken;
+  revokeAuthorizationToken: typeof revokeAuthorizationToken;
   verifyIdToken: typeof verifyIdToken;
   verifyWebhookToken: typeof verifyWebhookToken;
   _getApplePublicKeys: typeof _getApplePublicKeys;

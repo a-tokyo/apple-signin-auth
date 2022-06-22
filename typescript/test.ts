@@ -3,6 +3,7 @@ import appleAuth, {
   getAuthorizationToken,
   getClientSecret,
   refreshAuthorizationToken,
+  revokeAuthorizationToken,
   verifyIdToken,
   _getApplePublicKeys,
   _setFetch,
@@ -87,6 +88,24 @@ async function test() {
 
   // $ExpectError
   refreshAuthorizationToken('');
+
+  // $ExpectType Promise<any>
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: 'refresh_token' });
+
+  // $ExpectType Promise<any>
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: 'access_token' });
+
+  // $ExpectError
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: '' });
+
+  // $ExpectError
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '' });
+
+  // $ExpectError
+  revokeAuthorizationToken('', { clientID: '' });
+
+  // $ExpectError
+  revokeAuthorizationToken('');
 
   const {
     aud,
