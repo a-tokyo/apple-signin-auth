@@ -220,7 +220,7 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
+  }).then((res) => res.json());
 };
 
 /** Refreshes an Apple authorization token */
@@ -281,7 +281,7 @@ const revokeAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => res.json());
+  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
 };
 
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
