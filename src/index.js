@@ -220,7 +220,7 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => res.json());
+  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
 };
 
 /** Refreshes an Apple authorization token */
@@ -259,7 +259,7 @@ const revokeAuthorizationToken = async (
   options: {
     clientID: string,
     clientSecret: string,
-    tokenHintType: 'refresh_token' | 'access_token'
+    tokenHintType: 'refresh_token' | 'access_token',
   },
 ): Promise<any> => {
   if (!options.clientID) {
