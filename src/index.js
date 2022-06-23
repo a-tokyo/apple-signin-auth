@@ -188,6 +188,14 @@ const getClientSecret = (
   return jwt.sign(claims, key, { algorithm: 'ES256', header });
 };
 
+/**
+ * populate function
+ *
+ * populate response as json if can be
+ */
+const _populateDResAsJson = (res) =>
+  typeof res?.json === 'function' ? res.json() : res;
+
 /** Gets an Apple authorization token */
 const getAuthorizationToken = async (
   code: string,
@@ -220,7 +228,7 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
+  }).then((res) => _populateDResAsJson(res));
 };
 
 /** Refreshes an Apple authorization token */
@@ -250,7 +258,7 @@ const refreshAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => res.json());
+  }).then((res) => _populateDResAsJson(res));
 };
 
 /** Revoke Apple authorization token */
@@ -281,7 +289,7 @@ const revokeAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
+  }).then((res) => _populateDResAsJson(res));
 };
 
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
@@ -297,7 +305,7 @@ const _getApplePublicKeys = async ({
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then((res) => res.json());
+  }).then((res) => _populateDResAsJson(res));
 
   // Reset cache - will be refilled below
   APPLE_KEYS_CACHE = {};
