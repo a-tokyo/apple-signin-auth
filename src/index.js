@@ -220,7 +220,7 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => res.json());
+  }).then((res) => (typeof res?.json === 'function' ? res.json() : res));
 };
 
 /** Refreshes an Apple authorization token */
