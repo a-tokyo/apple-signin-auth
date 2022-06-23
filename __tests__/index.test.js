@@ -35,3 +35,58 @@ describe('appleSignin test', () => {
     expect(_getApplePublicKeys).toBeTruthy();
   });
 });
+
+describe('test for each functions', () => {
+  describe('test revokeAuthorizationToken functions', () => {
+    const token = 'test token';
+    const option = {
+      clientID: 'clientID',
+      clientSecret: 'clientSecret',
+      tokenHintType: 'refresh_token',
+    };
+    it('Should not throw error when response is empty', async () => {
+      const result = await appleSignin.revokeAuthorizationToken(token, option);
+      expect(result).toEqual('');
+    });
+  });
+
+  describe('test getAuthorizationToken functions', () => {
+    const code = 'test code';
+    const option = {
+      clientID: 'clientID',
+      clientSecret: 'clientSecret',
+      tokenHintType: 'refresh_token',
+    };
+    it('Should not throw error when response is empty', async () => {
+      const result = await appleSignin.getAuthorizationToken(code, option);
+      expect(result).toEqual({
+        error: 'invalid_client',
+      });
+    });
+  });
+
+  describe('test refreshAuthorizationToken functions', () => {
+    const refreshToken = 'test refreshToken';
+    const option = {
+      clientID: 'clientID',
+      clientSecret: 'clientSecret',
+      tokenHintType: 'refresh_token',
+    };
+    it('Should not throw error when response is empty', async () => {
+      const result = await appleSignin.refreshAuthorizationToken(
+        refreshToken,
+        option,
+      );
+      expect(result).toEqual({
+        error: 'invalid_client',
+      });
+    });
+  });
+
+  describe('test _getApplePublicKeys functions', () => {
+    it('Should not throw error when response is empty', async () => {
+      const result = await appleSignin._getApplePublicKeys();
+      expect(result).not.toBeNull();
+    });
+  });
+});
