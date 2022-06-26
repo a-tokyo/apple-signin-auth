@@ -90,13 +90,13 @@ async function test() {
   refreshAuthorizationToken('');
 
   // $ExpectType Promise<any>
-  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: 'refresh_token' });
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenTypeHint: 'refresh_token' });
 
   // $ExpectType Promise<any>
-  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: 'access_token' });
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenTypeHint: 'access_token' });
 
   // $ExpectError
-  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenHintType: '' });
+  revokeAuthorizationToken('', { clientID: '', clientSecret: '', tokenTypeHint: '' });
 
   // $ExpectError
   revokeAuthorizationToken('', { clientID: '', clientSecret: '' });

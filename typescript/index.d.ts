@@ -120,7 +120,7 @@ declare function revokeAuthorizationToken(
   options: {
     clientID: string;
     clientSecret: string;
-    tokenHintType: 'refresh_token' | 'access_token';
+    tokenTypeHint: 'refresh_token' | 'access_token';
   },
 ): Promise<any>;
 
