@@ -151,7 +151,7 @@ const clientSecret = appleSignin.getClientSecret({
 const options = {
   clientID: 'com.company.app', // Apple Client ID
   clientSecret,
-  tokenHintType: 'refresh_token'
+  tokenTypeHint: 'refresh_token'
 };
 
 try {
@@ -176,7 +176,7 @@ const clientSecret = appleSignin.getClientSecret({
 const options = {
   clientID: 'com.company.app', // Apple Client ID
   clientSecret,
-  tokenHintType: 'access_token'
+  tokenTypeHint: 'access_token'
 };
 
 try {

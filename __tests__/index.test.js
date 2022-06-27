@@ -42,7 +42,7 @@ describe('test for each functions', () => {
     const option = {
       clientID: 'clientID',
       clientSecret: 'clientSecret',
-      tokenHintType: 'refresh_token',
+      tokenTypeHint: 'refresh_token',
     };
     it('Should not throw error when response is empty', async () => {
       const result = await appleSignin.revokeAuthorizationToken(token, option);
@@ -55,7 +55,7 @@ describe('test for each functions', () => {
     const option = {
       clientID: 'clientID',
       clientSecret: 'clientSecret',
-      tokenHintType: 'refresh_token',
+      tokenTypeHint: 'refresh_token',
     };
     it('Should not throw error when response is empty', async () => {
       const result = await appleSignin.getAuthorizationToken(code, option);
@@ -70,7 +70,7 @@ describe('test for each functions', () => {
     const option = {
       clientID: 'clientID',
       clientSecret: 'clientSecret',
-      tokenHintType: 'refresh_token',
+      tokenTypeHint: 'refresh_token',
     };
     it('Should not throw error when response is empty', async () => {
       const result = await appleSignin.refreshAuthorizationToken(

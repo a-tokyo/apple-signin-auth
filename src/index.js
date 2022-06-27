@@ -272,7 +272,7 @@ const revokeAuthorizationToken = async (
   options: {
     clientID: string,
     clientSecret: string,
-    tokenHintType: 'refresh_token' | 'access_token',
+    tokenTypeHint: 'refresh_token' | 'access_token',
   },
 ): Promise<any> => {
   if (!options.clientID) {
@@ -289,7 +289,7 @@ const revokeAuthorizationToken = async (
   params.append('client_id', options.clientID);
   params.append('client_secret', options.clientSecret);
   params.append('token', token);
-  params.append('token_hint_type', options.tokenHintType);
+  params.append('token_type_hint', options.tokenTypeHint);
 
   const result = await fetch(url.toString(), {
     method: 'POST',
