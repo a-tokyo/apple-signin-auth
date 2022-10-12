@@ -188,19 +188,6 @@ const getClientSecret = (
   return jwt.sign(claims, key, { algorithm: 'ES256', header });
 };
 
-/**
- * populate function
- *
- * populate response as json if can be
- */
-const _populateResAsJson = async (res) => {
-  const data = await res.text();
-  if (!data) {
-    return data;
-  }
-  return JSON.parse(data);
-};
-
 /** Gets an Apple authorization token */
 const getAuthorizationToken = async (
   code: string,
@@ -233,7 +220,7 @@ const getAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => _populateResAsJson(res));
+  }).then((res) => res.json());
 };
 
 /** Refreshes an Apple authorization token */
@@ -263,7 +250,7 @@ const refreshAuthorizationToken = async (
   return fetch(url.toString(), {
     method: 'POST',
     body: params,
-  }).then((res) => _populateResAsJson(res));
+  }).then((res) => res.json());
 };
 
 /** Revoke Apple authorization token */
@@ -296,7 +283,13 @@ const revokeAuthorizationToken = async (
     body: params,
   });
 
-  return _populateResAsJson(result);
+  // on 200 apple will return an empty string.
+  // node-fetch will throw an error when calling .json() with an empty string
+  if ((await result.text()) === '') {
+    return '';
+  }
+
+  return result.json();
 };
 
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
@@ -312,7 +305,7 @@ const _getApplePublicKeys = async ({
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then((res) => _populateResAsJson(res));
+  }).then((res) => res.json());
 
   // Reset cache - will be refilled below
   APPLE_KEYS_CACHE = {};
