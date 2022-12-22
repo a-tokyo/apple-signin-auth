@@ -61,6 +61,7 @@ describe('test for each functions', () => {
       const result = await appleSignin.getAuthorizationToken(code, option);
       expect(result).toEqual({
         error: 'invalid_client',
+        error_description: "The code has expired or has been revoked.",
       });
     });
   });
