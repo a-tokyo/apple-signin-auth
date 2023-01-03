@@ -61,7 +61,7 @@ describe('test for each functions', () => {
       const result = await appleSignin.getAuthorizationToken(code, option);
       expect(result).toEqual({
         error: 'invalid_grant',
-        error_description: 'The token has expired or has been revoked.',
+        error_description: 'The code has expired or has been revoked.',
       });
     });
   });
@@ -80,7 +80,7 @@ describe('test for each functions', () => {
       );
       expect(result).toEqual({
         error: 'invalid_grant',
-        error_description: "The code has expired or has been revoked.",
+        error_description: 'The token has expired or has been revoked.',
       });
     });
   });
