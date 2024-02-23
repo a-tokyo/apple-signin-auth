@@ -130,7 +130,7 @@ const getAuthorizationUrl = (
     url.searchParams.append('response_mode', 'form_post');
   } else if (options.responseMode) {
     // Set response_mode to input responseMode
-    url.searchParams.append('response_mode', options.response_mode);
+    url.searchParams.append('response_mode', options.responseMode);
   }
 
   return url.toString();
