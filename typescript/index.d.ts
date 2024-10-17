@@ -98,6 +98,7 @@ declare function getAuthorizationToken(
     clientID: string;
     redirectUri: string;
     clientSecret: string;
+    codeVerifier?: string
   },
 ): Promise<AppleAuthorizationTokenResponseType>;
 
