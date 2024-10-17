@@ -208,7 +208,7 @@ const getAuthorizationToken = async (
     clientID: string,
     redirectUri: string,
     clientSecret: string,
-    codeVerifier: string
+    codeVerifier?: string
   },
 ): Promise<AppleAuthorizationTokenResponseType> => {
   // Handle input errors
@@ -230,7 +230,7 @@ const getAuthorizationToken = async (
   if (options.redirectUri) {
     params.append('redirect_uri', options.redirectUri);
   }
-  if(options.codeVerifier) {
+  if (options.codeVerifier) {
     params.append('code_verifier', options.codeVerifier);
   }
 
