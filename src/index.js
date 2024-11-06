@@ -368,7 +368,7 @@ const _getIdTokenApplePublicKey = async (
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
   // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
-  return cb(new Error('input error: Invalid id token public key id'));
+  return cb(error || new Error('input error: Invalid id token public key id'));
 };
 
 /** Verifies an Apple id token */
