@@ -349,18 +349,26 @@ const _getIdTokenApplePublicKey = async (
   header: string,
   cb: (?Error, ?string) => any,
 ): Function => {
+  /** error if found */
+  let error;
   // attempt fetching from cache
   if (APPLE_KEYS_CACHE[header.kid]) {
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
-  // fetch and cache current Apple public keys
-  await _getApplePublicKeys();
+  try {
+    // fetch and cache current Apple public keys
+    await _getApplePublicKeys();
+  } catch (err) {
+    // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
+    // we will still try to get the key from the cache
+    error = err;
+  }
   // attempt fetching from cache
   if (APPLE_KEYS_CACHE[header.kid]) {
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
   // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
-  return cb(new Error('input error: Invalid id token public key id'));
+  return cb(error || new Error('input error: Invalid id token public key id'));
 };
 
 /** Verifies an Apple id token */
