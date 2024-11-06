@@ -349,6 +349,8 @@ const _getIdTokenApplePublicKey = async (
   header: string,
   cb: (?Error, ?string) => any,
 ): Function => {
+  /** error if found */
+  let error;
   // attempt fetching from cache
   if (APPLE_KEYS_CACHE[header.kid]) {
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
@@ -356,9 +358,10 @@ const _getIdTokenApplePublicKey = async (
   try {
     // fetch and cache current Apple public keys
     await _getApplePublicKeys();
-  } catch (error) {
+  } catch (err) {
     // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
-    return cb(error); 
+    // we will still try to get the key from the cache
+    error = err;
   }
   // attempt fetching from cache
   if (APPLE_KEYS_CACHE[header.kid]) {
