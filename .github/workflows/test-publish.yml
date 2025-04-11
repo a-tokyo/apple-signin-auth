@@ -16,8 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get yarn cache
         id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v1
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
@@ -46,8 +46,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get yarn cache
         id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v1
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
@@ -66,16 +66,16 @@ jobs:
         run: |
           # Set PACKAGE_VERSION
           PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
-          echo ::set-output name=PACKAGE_VERSION::$PACKAGE_VERSION
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           # Set COMMIT_LOG
           COMMIT_LOG=`git log $(git describe --tags --abbrev=0)..HEAD --format='%s - %an'`
-          echo ::set-output name=COMMIT_LOG::$COMMIT_LOG
+          echo "COMMIT_LOG=$COMMIT_LOG" >> $GITHUB_ENV
       - uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.ownEnvVars.outputs.PACKAGE_VERSION }}
+          tag: ${{ env.PACKAGE_VERSION }}
           commit: main
-          body: ${{ steps.ownEnvVars.outputs.COMMIT_LOG }}
+          body: ${{ env.COMMIT_LOG }}
       - name: npm publish
         run: npm publish
         env:
