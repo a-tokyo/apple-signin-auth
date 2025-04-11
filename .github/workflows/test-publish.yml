@@ -72,7 +72,7 @@ jobs:
           echo "COMMIT_LOG=$COMMIT_LOG" >> $GITHUB_ENV
       - uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # token: ${{ secrets.GITHUB_TOKEN }} # no need for personal token
           tag: ${{ env.PACKAGE_VERSION }}
           commit: main
           body: ${{ env.COMMIT_LOG }}
