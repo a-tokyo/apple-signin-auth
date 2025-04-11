@@ -2,25 +2,30 @@ name: Test Release Publish
 
 on: [push]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Get yarn cache
         id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - uses: actions/cache@v1
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ubuntu-latest-node-12.x-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ubuntu-latest-node-12.x-yarn-
-      - uses: actions/setup-node@v1
+            ubuntu-latest-node-20.18-yarn-
+      - uses: actions/setup-node@v4
         with:
-          node-version: 12.x
+          node-version: '20.18'
           registry-url: https://registry.npmjs.org/
       - name: Install
         run: yarn install
@@ -38,19 +43,19 @@ jobs:
     if: success() && github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Get yarn cache
         id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - uses: actions/cache@v1
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ubuntu-latest-node-12.x-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ubuntu-latest-node-12.x-yarn-
-      - uses: actions/setup-node@v1
+            ubuntu-latest-node-20.18-yarn-
+      - uses: actions/setup-node@v4
         with:
-          node-version: 12.x
+          node-version: '20.18'
           registry-url: https://registry.npmjs.org/
       - name: Install
         run: yarn install
