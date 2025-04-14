@@ -65,7 +65,7 @@
     "eslint-plugin-react": "^7.22.0",
     "flow-bin": "^0.180.1",
     "flow-copy-source": "^2.0.9",
-    "husky": "^4.2.5",
+    "husky": "^9.0.11",
     "jest": "^28.1.1",
     "jest-cli": "^28.1.1",
     "lint-staged": "^12.5.0",
