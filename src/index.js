@@ -7,7 +7,7 @@ import NodeRSA from 'node-rsa';
 /**
  * Fetch function
  */
-let fetch = global.fetch; // Use native Node.js fetch
+let { fetch } = global; // Use native Node.js fetch
 
 export type AppleIdTokenType = {
   /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
