@@ -1,6 +1,6 @@
 {
   "name": "apple-signin-auth",
-  "version": "1.7.9",
+  "version": "2.0.0",
   "description": " Apple signin for node.",
   "author": {
     "name": "Ahmed Tarek",
@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.0",
-    "node-fetch": "^2.6.7",
     "node-rsa": "^1.1.1"
   },
   "devDependencies": {
@@ -97,5 +96,8 @@
     "types",
     "typescript",
     "node"
-  ]
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

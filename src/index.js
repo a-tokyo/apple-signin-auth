@@ -3,12 +3,11 @@ import { URL } from 'url';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import NodeRSA from 'node-rsa';
-import rawFetch from 'node-fetch';
 
 /**
  * Fetch function
  */
-let fetch = rawFetch;
+let { fetch } = global; // Use native Node.js fetch
 
 export type AppleIdTokenType = {
   /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
@@ -89,7 +88,7 @@ export type AppleAuthorizationTokenResponseType = {
   expires_in: 300,
   /** used to regenerate (new) access tokens. */
   refresh_token: string,
-  /** A JSON Web Token that contains the user’s identity information. */
+  /** A JSON Web Token that contains the user's identity information. */
   id_token: string,
 };
 
@@ -208,7 +207,7 @@ const getAuthorizationToken = async (
     clientID: string,
     redirectUri: string,
     clientSecret: string,
-    codeVerifier?: string
+    codeVerifier?: string,
   },
 ): Promise<AppleAuthorizationTokenResponseType> => {
   // Handle input errors

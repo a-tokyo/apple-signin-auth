@@ -16,6 +16,8 @@ https://developer.apple.com/sign-in-with-apple/get-started/) related to "Sign in
 3. You should create App ID and Service ID in your Apple Developer Account.
 4. You should generate private key for your Service ID in your Apple Developer Account.
 
+- Node.js >= 18.0.0 (for native fetch support). If you need support for Node versions less than 18, use v <=2.0.0 of this library
+
 ## Apple Signin Setup
 Deatiled confuguration instructions can be found at [blog post](https://medium.com/@artyomefremov/add-sign-in-with-apple-button-to-your-website-today-part-1-12ed1444623a?postPublishedType=initial) and [Apple docs](https://help.apple.com/developer-account/#/dev1c0e25352).
 
@@ -90,7 +92,7 @@ Result of ```getAuthorizationToken``` command is a JSON object representing Appl
     token_type: 'Bearer', // It will always be Bearer.
     expires_in: 300, // The amount of time, in seconds, before the access token expires.
     refresh_token: 'REFRESH_TOKEN', // used to regenerate new access tokens. Store this token securely on your server.
-    id_token: 'ID_TOKEN' // A JSON Web Token that contains the user’s identity information.
+    id_token: 'ID_TOKEN' // A JSON Web Token that contains the user's identity information.
 }
 ```
 
@@ -279,7 +281,7 @@ Notes:
 - The Apple docs for this step are located [here](https://help.apple.com/developer-account/?lang=en#/dev217f824b6).
 
 ### Extra API functions
-- _setFetch: `(fetchFn: function) => void` - Sets the fetch function, defaults to node-fetch. eg: appleSigninAuth._setFetch(fetchWithProxy);
+- _setFetch: `(fetchFn: function) => void` - Sets the fetch function, defaults to native Node.js fetch. eg: appleSigninAuth._setFetch(fetchWithProxy);
 
 ## Extras
 - Handles apple public keys switching solving this issue https://forums.developer.apple.com/thread/129047
