@@ -1,8 +1,8 @@
 /* @flow */
 import { URL } from 'url';
+import crypto from 'crypto';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import NodeRSA from 'node-rsa';
 
 /**
  * Fetch function
@@ -100,8 +100,8 @@ let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 /** Gets the Apple Authorizaion URL */
 const getAuthorizationUrl = (
   options: {
-    clientID: string,
-    redirectUri: string,
+    clientID?: string,
+    redirectUri?: string,
     responseMode?: 'query' | 'fragment' | 'form_post',
     state?: string,
     scope?: string,
@@ -114,15 +114,23 @@ const getAuthorizationUrl = (
   if (!options.redirectUri) {
     throw Error('redirectUri is empty');
   }
+  // Capture validated values as locals: Flow drops property refinements across
+  // the intervening searchParams.append() calls below.
+  const { clientID, redirectUri } = options;
 
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/authorize';
 
   url.searchParams.append('response_type', 'code');
   url.searchParams.append('state', options.state || 'state');
-  url.searchParams.append('client_id', options.clientID);
-  url.searchParams.append('redirect_uri', options.redirectUri);
-  url.searchParams.append('scope', `openid${` ${options.scope}`}`);
+  url.searchParams.append('client_id', clientID);
+  url.searchParams.append('redirect_uri', redirectUri);
+  // Append the optional scope; omit cleanly when absent (previously emitted the
+  // literal "openid undefined" when no scope was passed).
+  url.searchParams.append(
+    'scope',
+    `openid${options.scope ? ` ${options.scope}` : ''}`,
+  );
 
   if (options.scope?.includes('email')) {
     // Force set response_mode to 'form_post' if scope includes email
@@ -138,9 +146,10 @@ const getAuthorizationUrl = (
 /** Gets your Apple clientSecret */
 const getClientSecret = (
   options: {
-    clientID: string,
-    teamID: string,
-    keyIdentifier: string,
+    clientID?: string,
+    teamID?: string,
+    teamId?: string, // legacy alias for teamID, handled until removed in next major
+    keyIdentifier?: string,
     privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
     privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
     expAfter?: number,
@@ -182,7 +191,7 @@ const getClientSecret = (
   const header = { alg: 'ES256', kid: options.keyIdentifier };
   const key = options.privateKeyPath
     ? fs.readFileSync(options.privateKeyPath)
-    : options.privateKey;
+    : options.privateKey || '';
 
   return jwt.sign(claims, key, { algorithm: 'ES256', header });
 };
@@ -192,7 +201,7 @@ const getClientSecret = (
  *
  * populate response as json if can be
  */
-const _populateResAsJson = async (res) => {
+const _populateResAsJson = async (res: { text(): Promise<string> }) => {
   const data = await res.text();
   if (!data) {
     return data;
@@ -305,7 +314,7 @@ const revokeAuthorizationToken = async (
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
 const _getApplePublicKeys = async ({
   disableCaching,
-}: { disableCaching?: boolean } = {}): Array<string> => {
+}: { disableCaching?: boolean } = {}): Promise<Array<string>> => {
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/keys';
 
@@ -322,13 +331,13 @@ const _getApplePublicKeys = async ({
 
   // Parse and cache keys
   const keyValues = data.keys.map((key) => {
-    // parse key
-    const publKeyObj = new NodeRSA();
-    publKeyObj.importKey(
-      { n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') },
-      'components-public',
-    );
-    const publicKey = publKeyObj.exportKey(['public']);
+    // parse key - Apple returns base64url-encoded JWK components (n, e)
+    const publicKey = crypto
+      .createPublicKey({
+        key: { kty: 'RSA', n: key.n, e: key.e },
+        format: 'jwk',
+      })
+      .export({ type: 'spki', format: 'pem' });
 
     // cache key
     if (!disableCaching) {
@@ -345,9 +354,9 @@ const _getApplePublicKeys = async ({
 
 /** Gets the Apple Public Key corresponding to the JSON's header  */
 const _getIdTokenApplePublicKey = async (
-  header: string,
-  cb: (?Error, ?string) => any,
-): Function => {
+  header: { kid: string, ... },
+  cb: (err: ?Error, key?: string) => mixed,
+): Promise<mixed> => {
   /** error if found */
   let error;
   // attempt fetching from cache
@@ -386,7 +395,7 @@ const verifyIdToken = async (
         issuer: ENDPOINT_URL,
         ...options,
       },
-      (error: Error, decoded: AppleIdTokenType) =>
+      (error: ?Error, decoded: AppleIdTokenType) =>
         error ? reject(error) : resolve(decoded),
     ),
   );
@@ -406,7 +415,7 @@ const verifyWebhookToken = async (
         issuer: ENDPOINT_URL,
         ...options,
       },
-      (error: Error, decoded: RawAppleWebhookTokenType) =>
+      (error: ?Error, decoded: RawAppleWebhookTokenType) =>
         error
           ? reject(error)
           : resolve({ ...decoded, events: JSON.parse(decoded.events) }),

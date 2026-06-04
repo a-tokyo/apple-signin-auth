@@ -1,5 +1,4 @@
 /* @flow */
-/* eslint-disable import/no-named-as-default-member */
 
 import appleSignin, {
   getAuthorizationUrl,
@@ -39,26 +38,24 @@ describe('appleSignin test', () => {
 describe('test for each functions', () => {
   describe('test revokeAuthorizationToken functions', () => {
     const token = 'test token';
-    const option = {
-      clientID: 'clientID',
-      clientSecret: 'clientSecret',
-      tokenTypeHint: 'refresh_token',
-    };
     it('Should not throw error when response is empty', async () => {
-      const result = await appleSignin.revokeAuthorizationToken(token, option);
+      const result = await appleSignin.revokeAuthorizationToken(token, {
+        clientID: 'clientID',
+        clientSecret: 'clientSecret',
+        tokenTypeHint: 'refresh_token',
+      });
       expect(result).toEqual('');
     });
   });
 
   describe('test getAuthorizationToken functions', () => {
     const code = 'test code';
-    const option = {
-      clientID: 'clientID',
-      clientSecret: 'clientSecret',
-      tokenTypeHint: 'refresh_token',
-    };
     it('Should not throw error when response is empty', async () => {
-      const result = await appleSignin.getAuthorizationToken(code, option);
+      const result = await appleSignin.getAuthorizationToken(code, {
+        clientID: 'clientID',
+        clientSecret: 'clientSecret',
+        redirectUri: 'https://example.com',
+      });
       expect(result).toEqual({
         error: 'invalid_grant',
         error_description: 'The code has expired or has been revoked.',
@@ -68,16 +65,11 @@ describe('test for each functions', () => {
 
   describe('test refreshAuthorizationToken functions', () => {
     const refreshToken = 'test refreshToken';
-    const option = {
-      clientID: 'clientID',
-      clientSecret: 'clientSecret',
-      tokenTypeHint: 'refresh_token',
-    };
     it('Should not throw error when response is empty', async () => {
-      const result = await appleSignin.refreshAuthorizationToken(
-        refreshToken,
-        option,
-      );
+      const result = await appleSignin.refreshAuthorizationToken(refreshToken, {
+        clientID: 'clientID',
+        clientSecret: 'clientSecret',
+      });
       expect(result).toEqual({
         error: 'invalid_grant',
         error_description: 'The token has expired or has been revoked.',
