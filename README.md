@@ -31,6 +31,22 @@ OR
 yarn add apple-signin-auth
 ```
 
+## Cloudflare Workers & edge runtimes
+
+`apple-signin-auth` runs on [Cloudflare Workers](https://developers.cloudflare.com/workers/) and other Node-compatible edge runtimes. Since `v2.0.0` it uses the platform's native `fetch` (no `node-fetch`), and since `v2.1.0` it parses Apple's public keys with Node's built-in `crypto` (no `node-rsa`) — so the only runtime dependencies are `jsonwebtoken` and `node:crypto`, both supported on Workers.
+
+Enable the [`nodejs_compat`](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) flag with a recent `compatibility_date` (`node:crypto` support has been continuously improved, so prefer the latest your runtime allows):
+
+```toml
+# wrangler.toml
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+```
+
+Notes:
+- Workers have no filesystem — pass the key contents to `getClientSecret` via `privateKey` (e.g. from a [Worker secret](https://developers.cloudflare.com/workers/configuration/secrets/)), not `privateKeyPath`.
+- Every other function (`getAuthorizationUrl`, `getAuthorizationToken`, `verifyIdToken`, `verifyWebhookToken`, …) works unchanged.
+
 ## Usage
 
 ### 1. Get authorization URL
