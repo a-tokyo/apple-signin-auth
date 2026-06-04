@@ -31,14 +31,25 @@
     "lint": "eslint .",
     "prepublishOnly": "export NODE_ENV=production && yarn build",
     "prepare": "husky",
-    "test": "npm run build && yarn jest",
+    "test": "npm run build && yarn jest --coverage",
     "test:typescript": "tsd"
   },
   "jest": {
     "testPathIgnorePatterns": [
       "<rootDir>/typescript/",
       "<rootDir>/node_modules/"
-    ]
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 95,
+        "branches": 88,
+        "functions": 100,
+        "lines": 95
+      }
+    }
   },
   "tsd": {
     "directory": "typescript"
@@ -62,7 +73,7 @@
     "globals": "^16.0.0",
     "husky": "^9.0.0",
     "jest": "^30.0.0",
-    "lint-staged": "^17.0.0",
+    "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
     "tsd": "^0.33.0",
     "typescript": "^5.0.0"
