@@ -31,7 +31,7 @@ declare module 'url' {
 
 declare module 'fs' {
   declare function existsSync(path: string): boolean;
-  declare function readFileSync(path: string): string;
+  declare function readFileSync(path: string, encoding?: string): string | Buffer;
 }
 
 declare module 'crypto' {
