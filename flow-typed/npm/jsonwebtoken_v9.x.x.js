@@ -1,4 +1,6 @@
-// Sourced from flow-typed: definitions/npm/jsonwebtoken_v9.x.x/flow_v0.201.x-
+// flow-typed signature: 8dea951ac750466a6eaaa762cac87e1a
+// flow-typed version: 07e68fdd70/jsonwebtoken_v9.x.x/flow_>=v0.201.x
+
 declare module 'jsonwebtoken' {
   declare type Algorithm =
     | 'HS256'
