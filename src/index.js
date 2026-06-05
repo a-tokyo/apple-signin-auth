@@ -98,35 +98,28 @@ const ENDPOINT_URL = 'https://appleid.apple.com';
 let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 
 /** Gets the Apple Authorizaion URL */
-const getAuthorizationUrl = (
-  options: {
-    clientID?: string,
-    redirectUri?: string,
-    responseMode?: 'query' | 'fragment' | 'form_post',
-    state?: string,
-    scope?: string,
-  } = {},
-): string => {
+const getAuthorizationUrl = (options?: {
+  clientID: string,
+  redirectUri: string,
+  responseMode?: 'query' | 'fragment' | 'form_post',
+  state?: string,
+  scope?: string,
+}): string => {
   // Handle input errors
-  if (!options.clientID) {
+  if (!options || !options.clientID) {
     throw Error('clientID is empty');
   }
   if (!options.redirectUri) {
     throw Error('redirectUri is empty');
   }
-  // Capture validated values as locals: Flow drops property refinements across
-  // the intervening searchParams.append() calls below.
-  const { clientID, redirectUri } = options;
 
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/authorize';
 
   url.searchParams.append('response_type', 'code');
   url.searchParams.append('state', options.state || 'state');
-  url.searchParams.append('client_id', clientID);
-  url.searchParams.append('redirect_uri', redirectUri);
-  // Append the optional scope; omit cleanly when absent (previously emitted the
-  // literal "openid undefined" when no scope was passed).
+  url.searchParams.append('client_id', options.clientID);
+  url.searchParams.append('redirect_uri', options.redirectUri);
   url.searchParams.append(
     'scope',
     `openid${options.scope ? ` ${options.scope}` : ''}`,
@@ -144,19 +137,18 @@ const getAuthorizationUrl = (
 };
 
 /** Gets your Apple clientSecret */
-const getClientSecret = (
-  options: {
-    clientID?: string,
-    teamID?: string,
-    teamId?: string, // legacy alias for teamID, handled until removed in next major
-    keyIdentifier?: string,
-    privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
-    privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
-    expAfter?: number,
-  } = {},
-): string => {
+const getClientSecret = (options?: {
+  clientID: string,
+  teamID: string,
+  // legacy alias for teamID
+  teamId?: string,
+  keyIdentifier: string,
+  privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
+  privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
+  expAfter?: number,
+}): string => {
   // Handle input errors
-  if (!options.clientID) {
+  if (!options || !options.clientID) {
     throw new Error('clientID is empty');
   }
   if (!options.teamID && !options.teamId) {
@@ -331,7 +323,7 @@ const _getApplePublicKeys = async ({
 
   // Parse and cache keys
   const keyValues = data.keys.map((key) => {
-    // parse key - Apple returns base64url-encoded JWK components (n, e)
+    // parse key
     const publicKey = crypto
       .createPublicKey({
         key: { kty: 'RSA', n: key.n, e: key.e },
