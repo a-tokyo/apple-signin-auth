@@ -1,8 +1,8 @@
 /* @flow */
 import { URL } from 'url';
+import crypto from 'crypto';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import NodeRSA from 'node-rsa';
 
 /**
  * Fetch function
@@ -64,21 +64,6 @@ export type AppleWebhookTokenType = {
   events: AppleWebhookTokenEventType,
 };
 
-type RawAppleWebhookTokenType = {
-  /** The issuer-registered claim key, which has the value https://appleid.apple.com. */
-  iss: string,
-  /** Your client_id in your Apple Developer account. */
-  aud: string,
-  /** The expiry time for the token. This value is typically set to five minutes. */
-  exp: string,
-  /** The time the token was issued. */
-  iat: string,
-  /** The unique identifier for this token. */
-  jti: string,
-  /** The JSON-stringified event description. */
-  events: string,
-};
-
 export type AppleAuthorizationTokenResponseType = {
   /** A token used to access allowed data. */
   access_token: string,
@@ -97,18 +82,16 @@ const ENDPOINT_URL = 'https://appleid.apple.com';
 /** Apple keys cache - { kid: public_key } */
 let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 
-/** Gets the Apple Authorizaion URL */
-const getAuthorizationUrl = (
-  options: {
-    clientID: string,
-    redirectUri: string,
-    responseMode?: 'query' | 'fragment' | 'form_post',
-    state?: string,
-    scope?: string,
-  } = {},
-): string => {
+/** Gets the Apple Authorization URL */
+const getAuthorizationUrl = (options?: {
+  clientID: string,
+  redirectUri: string,
+  responseMode?: 'query' | 'fragment' | 'form_post',
+  state?: string,
+  scope?: string,
+}): string => {
   // Handle input errors
-  if (!options.clientID) {
+  if (!options || !options.clientID) {
     throw Error('clientID is empty');
   }
   if (!options.redirectUri) {
@@ -122,7 +105,10 @@ const getAuthorizationUrl = (
   url.searchParams.append('state', options.state || 'state');
   url.searchParams.append('client_id', options.clientID);
   url.searchParams.append('redirect_uri', options.redirectUri);
-  url.searchParams.append('scope', `openid${` ${options.scope}`}`);
+  url.searchParams.append(
+    'scope',
+    `openid${options.scope ? ` ${options.scope}` : ''}`,
+  );
 
   if (options.scope?.includes('email')) {
     // Force set response_mode to 'form_post' if scope includes email
@@ -136,18 +122,18 @@ const getAuthorizationUrl = (
 };
 
 /** Gets your Apple clientSecret */
-const getClientSecret = (
-  options: {
-    clientID: string,
-    teamID: string,
-    keyIdentifier: string,
-    privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
-    privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
-    expAfter?: number,
-  } = {},
-): string => {
+const getClientSecret = (options?: {
+  clientID: string,
+  teamID: string,
+  // legacy alias for teamID
+  teamId?: string,
+  keyIdentifier: string,
+  privateKey?: string, // one of [privateKeyPath, privateKey] need to be passed
+  privateKeyPath?: string, // one of [privateKeyPath, privateKey] need to be passed
+  expAfter?: number,
+}): string => {
   // Handle input errors
-  if (!options.clientID) {
+  if (!options || !options.clientID) {
     throw new Error('clientID is empty');
   }
   if (!options.teamID && !options.teamId) {
@@ -181,8 +167,8 @@ const getClientSecret = (
 
   const header = { alg: 'ES256', kid: options.keyIdentifier };
   const key = options.privateKeyPath
-    ? fs.readFileSync(options.privateKeyPath)
-    : options.privateKey;
+    ? fs.readFileSync(options.privateKeyPath, 'utf8')
+    : options.privateKey || '';
 
   return jwt.sign(claims, key, { algorithm: 'ES256', header });
 };
@@ -192,7 +178,7 @@ const getClientSecret = (
  *
  * populate response as json if can be
  */
-const _populateResAsJson = async (res) => {
+const _populateResAsJson = async (res: { text(): Promise<string> }) => {
   const data = await res.text();
   if (!data) {
     return data;
@@ -305,7 +291,7 @@ const revokeAuthorizationToken = async (
 /** Gets an Array of Apple Public Keys that can be used to decode Apple's id tokens */
 const _getApplePublicKeys = async ({
   disableCaching,
-}: { disableCaching?: boolean } = {}): Array<string> => {
+}: { disableCaching?: boolean } = {}): Promise<Array<string>> => {
   const url = new URL(ENDPOINT_URL);
   url.pathname = '/auth/keys';
 
@@ -323,12 +309,12 @@ const _getApplePublicKeys = async ({
   // Parse and cache keys
   const keyValues = data.keys.map((key) => {
     // parse key
-    const publKeyObj = new NodeRSA();
-    publKeyObj.importKey(
-      { n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') },
-      'components-public',
-    );
-    const publicKey = publKeyObj.exportKey(['public']);
+    const publicKey = crypto
+      .createPublicKey({
+        key: { kty: 'RSA', n: key.n, e: key.e },
+        format: 'jwk',
+      })
+      .export({ type: 'spki', format: 'pem' });
 
     // cache key
     if (!disableCaching) {
@@ -345,13 +331,13 @@ const _getApplePublicKeys = async ({
 
 /** Gets the Apple Public Key corresponding to the JSON's header  */
 const _getIdTokenApplePublicKey = async (
-  header: string,
-  cb: (?Error, ?string) => any,
-): Function => {
+  header: { kid?: string, ... },
+  cb: (err: Error | null, key?: string) => mixed,
+): Promise<mixed> => {
   /** error if found */
-  let error;
+  let error: ?Error;
   // attempt fetching from cache
-  if (APPLE_KEYS_CACHE[header.kid]) {
+  if (header.kid && APPLE_KEYS_CACHE[header.kid]) {
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
   try {
@@ -360,10 +346,10 @@ const _getIdTokenApplePublicKey = async (
   } catch (err) {
     // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
     // we will still try to get the key from the cache
-    error = err;
+    error = err instanceof Error ? err : new Error(String(err));
   }
   // attempt fetching from cache
-  if (APPLE_KEYS_CACHE[header.kid]) {
+  if (header.kid && APPLE_KEYS_CACHE[header.kid]) {
     return cb(null, APPLE_KEYS_CACHE[header.kid]);
   }
   // key was not fetched - highly unlikely, means apple is having issues or somebody faked the JSON
@@ -380,13 +366,15 @@ const verifyIdToken = async (
   new Promise((resolve, reject) =>
     jwt.verify(
       idToken,
-      _getIdTokenApplePublicKey,
+      (header, cb) => {
+        _getIdTokenApplePublicKey(header, cb);
+      },
       {
-        algorithms: 'RS256',
+        algorithms: ['RS256'],
         issuer: ENDPOINT_URL,
         ...options,
       },
-      (error: Error, decoded: AppleIdTokenType) =>
+      (error: ?Error, decoded: any) =>
         error ? reject(error) : resolve(decoded),
     ),
   );
@@ -400,13 +388,15 @@ const verifyWebhookToken = async (
   new Promise((resolve, reject) =>
     jwt.verify(
       webhookToken,
-      _getIdTokenApplePublicKey,
+      (header, cb) => {
+        _getIdTokenApplePublicKey(header, cb);
+      },
       {
-        algorithms: 'RS256',
+        algorithms: ['RS256'],
         issuer: ENDPOINT_URL,
         ...options,
       },
-      (error: Error, decoded: RawAppleWebhookTokenType) =>
+      (error: ?Error, decoded: any) =>
         error
           ? reject(error)
           : resolve({ ...decoded, events: JSON.parse(decoded.events) }),

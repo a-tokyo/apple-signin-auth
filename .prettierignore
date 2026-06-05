@@ -1,0 +1,4 @@
+lib/
+flow-typed/
+coverage/
+node_modules/
