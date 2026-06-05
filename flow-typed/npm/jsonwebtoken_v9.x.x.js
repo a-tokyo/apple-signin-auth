@@ -1,8 +1,4 @@
-// Minimal hand-maintained Flow libdef for jsonwebtoken v9 (sign + verify).
-// The latest flow-typed def (v8.5.x) targets Flow <=0.103, relies on the
-// deprecated `$Shape` utility, and contains duplicate class declarations — none
-// of which type-check on modern Flow. This covers exactly what this library uses.
-
+// Sourced from flow-typed: definitions/npm/jsonwebtoken_v9.x.x/flow_v0.201.x-
 declare module 'jsonwebtoken' {
   declare type Algorithm =
     | 'HS256'
@@ -22,66 +18,106 @@ declare module 'jsonwebtoken' {
   declare class JsonWebTokenError extends Error {
     inner: Error;
   }
+
   declare class TokenExpiredError extends JsonWebTokenError {
-    expiredAt: number;
+    expiredAt: Date;
   }
+
   declare class NotBeforeError extends JsonWebTokenError {
     date: Date;
   }
 
+  declare type Secret = string | { key: string, passphrase: string, ... };
+
   declare type SignOptions = {
     algorithm?: Algorithm,
-    expiresIn?: number | string,
-    notBefore?: number | string,
-    audience?: string | Array<string>,
-    issuer?: string | Array<string>,
-    jwtid?: string,
-    subject?: string,
     keyid?: string,
+    expiresIn?: string | number,
+    notBefore?: string | number,
+    audience?: string | Array<string>,
+    subject?: string,
+    issuer?: string,
+    jwtid?: string,
+    mutatePayload?: boolean,
     noTimestamp?: boolean,
     header?: { ... },
+    encoding?: string,
+    allowInsecureKeySizes?: boolean,
+    allowInvalidAsymmetricKeyTypes?: boolean,
     ...
   };
 
   declare type VerifyOptions = {
     algorithms?: Array<Algorithm>,
-    audience?: string | Array<string>,
+    audience?: string | RegExp | Array<string | RegExp>,
+    clockTimestamp?: number,
+    clockTolerance?: number,
+    complete?: boolean,
     issuer?: string | Array<string>,
     ignoreExpiration?: boolean,
     ignoreNotBefore?: boolean,
-    subject?: string | Array<string>,
-    clockTolerance?: number,
+    jwtid?: string,
+    nonce?: string,
+    subject?: string,
     maxAge?: string | number,
-    clockTimestamp?: number,
+    allowInvalidAsymmetricKeyTypes?: boolean,
     ...
   };
 
-  declare type GetPublicKeyOrSecret = (
-    header: { kid: string, ... },
-    callback: (err: ?Error, key?: string) => mixed,
-  ) => mixed;
+  declare type DecodeOptions = {
+    complete?: boolean,
+    json?: boolean,
+    ...
+  };
+
+  declare type JwtHeader = {
+    alg: string,
+    typ?: string,
+    kid?: string,
+    ...
+  };
+
+  declare type JwtPayload = { [string]: mixed };
+
+  declare type Jwt = {
+    header: JwtHeader,
+    payload: JwtPayload | string,
+    signature: string,
+    ...
+  };
+
+  declare type SignCallback = (
+    error: Error | null,
+    encoded: string | void,
+  ) => void;
 
   declare type VerifyCallback = (
-    err: ?(JsonWebTokenError | NotBeforeError | TokenExpiredError),
-    decoded: any,
-  ) => mixed;
+    error: JsonWebTokenError | NotBeforeError | TokenExpiredError | null,
+    decoded: mixed,
+  ) => void;
+
+  declare type GetPublicKeyOrSecret = (
+    header: JwtHeader,
+    callback: (err: Error | null, secret?: Secret) => void,
+  ) => void;
 
   declare module.exports: {
     sign(
-      payload: string | Buffer | { ... },
-      secretOrPrivateKey: string | Buffer,
-      options?: SignOptions,
+      payload: string | { ... },
+      secretOrPrivateKey: Secret,
+      optionsOrCallback?: SignOptions | SignCallback,
+      callback?: SignCallback,
     ): string,
     verify(
       token: string,
-      secretOrPublicKey: string | Buffer | GetPublicKeyOrSecret,
-      options?: VerifyOptions,
+      secretOrPublicKey: Secret | GetPublicKeyOrSecret,
+      optionsOrCallback?: VerifyOptions | VerifyCallback,
       callback?: VerifyCallback,
-    ): void,
+    ): JwtPayload | string,
     decode(
       token: string,
-      options?: { complete?: boolean, json?: boolean, ... },
-    ): any,
+      options?: DecodeOptions,
+    ): JwtPayload | string | null,
     JsonWebTokenError: typeof JsonWebTokenError,
     NotBeforeError: typeof NotBeforeError,
     TokenExpiredError: typeof TokenExpiredError,

@@ -5,8 +5,6 @@
 /* eslint-disable */
 
 // --- Node globals ---
-declare class Buffer {}
-
 declare class URLSearchParams {
   constructor(
     init?: string | Array<[string, string]> | { [string]: string },
@@ -31,7 +29,7 @@ declare module 'url' {
 
 declare module 'fs' {
   declare function existsSync(path: string): boolean;
-  declare function readFileSync(path: string, encoding?: string): string | Buffer;
+  declare function readFileSync(path: string, encoding: string): string;
 }
 
 declare module 'crypto' {
