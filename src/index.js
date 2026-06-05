@@ -383,7 +383,7 @@ const verifyIdToken = async (
       idToken,
       _getIdTokenApplePublicKey,
       {
-        algorithms: 'RS256',
+        algorithms: ['RS256'],
         issuer: ENDPOINT_URL,
         ...options,
       },
@@ -403,7 +403,7 @@ const verifyWebhookToken = async (
       webhookToken,
       _getIdTokenApplePublicKey,
       {
-        algorithms: 'RS256',
+        algorithms: ['RS256'],
         issuer: ENDPOINT_URL,
         ...options,
       },

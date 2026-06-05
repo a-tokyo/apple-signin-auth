@@ -44,7 +44,7 @@ declare module 'jsonwebtoken' {
   };
 
   declare type VerifyOptions = {
-    algorithms?: Algorithm | Array<Algorithm>,
+    algorithms?: Array<Algorithm>,
     audience?: string | Array<string>,
     issuer?: string | Array<string>,
     ignoreExpiration?: boolean,
