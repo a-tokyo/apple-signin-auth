@@ -97,7 +97,7 @@ const ENDPOINT_URL = 'https://appleid.apple.com';
 /** Apple keys cache - { kid: public_key } */
 let APPLE_KEYS_CACHE: { [kid: string]: string } = {};
 
-/** Gets the Apple Authorizaion URL */
+/** Gets the Apple Authorization URL */
 const getAuthorizationUrl = (options?: {
   clientID: string,
   redirectUri: string,
