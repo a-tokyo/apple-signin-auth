@@ -73,7 +73,7 @@
     "globals": "^16.0.0",
     "husky": "^9.0.0",
     "jest": "^30.0.0",
-    "lint-staged": "^15.0.0",
+    "lint-staged": "^17.0.8",
     "prettier": "^3.0.0",
     "tsd": "^0.33.0",
     "typescript": "^5.0.0"
