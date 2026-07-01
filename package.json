@@ -70,7 +70,7 @@
     "eslint-plugin-ft-flow": "^3.0.0",
     "flow-bin": "^0.317.0",
     "flow-copy-source": "^2.0.9",
-    "globals": "^16.0.0",
+    "globals": "^17.7.0",
     "husky": "^9.0.0",
     "jest": "^30.0.0",
     "lint-staged": "^15.0.0",
