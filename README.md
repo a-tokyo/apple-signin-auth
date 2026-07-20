@@ -314,6 +314,13 @@ Notes:
 - [Web: Signin with Apple](https://dev.to/onygami/how-to-add-signin-with-apple-on-your-website-43m9)
   - Note that the frontend implementation can be replaced with [Apple Signin for web (React/Vue)](https://github.com/A-Tokyo/react-apple-signin).
 
-
 ## Contributing
+
 Pull requests are highly appreciated! For major changes, please open an issue first to discuss what you would like to change.
+
+
+A huge thanks to the amazing people who have contributed.
+
+<a href="https://github.com/a-tokyo/apple-signin-auth/graphs/contributors?all=1">
+  <img src="https://contrib.rocks/image?repo=a-tokyo/apple-signin-auth" />
+</a><br/>
