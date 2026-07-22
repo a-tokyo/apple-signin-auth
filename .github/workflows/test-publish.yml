@@ -69,8 +69,10 @@ jobs:
       - name: Read package metadata
         id: pkg
         run: |
-          echo "version=$(node -p -e "require('./package.json').version")" >> "$GITHUB_OUTPUT"
-          echo "name=$(node -p -e "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+          VERSION="$(node -p -e 'require("./package.json").version')"
+          NAME="$(node -p -e 'require("./package.json").name')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
       - name: Build changelog
         id: changelog
         run: |
