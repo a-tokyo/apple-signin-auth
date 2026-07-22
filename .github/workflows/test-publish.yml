@@ -4,11 +4,16 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
+# Least privilege by default; the publish job elevates for itself only.
 permissions:
-  contents: write # create GitHub releases/tags
-  id-token: write # OIDC token for npm trusted publishing
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -44,11 +49,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: success() && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write # create GitHub release + tag
+      id-token: write # OIDC token for npm trusted publishing
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
-          fetch-depth: 0 # full history so git describe/tag lookups work
+          fetch-depth: 0 # full history so git describe/changelog works
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '24.x' # ships npm >= 11.5.1, required for OIDC trusted publishing
@@ -58,29 +66,44 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Build
         run: NODE_ENV=production yarn build
-      - name: Setup env vars
-        id: ownEnvVars
+      - name: Read package metadata
+        id: pkg
         run: |
-          PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
-          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          echo "COMMIT_LOG<<EOF" >> $GITHUB_ENV
-          git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --format='- %s (%an)' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      - name: Check if version already released
-        id: check_tag
+          echo "version=$(node -p -e "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "name=$(node -p -e "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+      - name: Build changelog
+        id: changelog
         run: |
-          if git rev-parse "refs/tags/${{ env.PACKAGE_VERSION }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --format='- %s (%an)' >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+      # Decoupled gates so a rerun recovers the exact failure in #196
+      # (release/tag exists but npm version is missing).
+      - name: Check if version already published to npm
+        id: check_npm
+        run: |
+          if npm view "${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}" version >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check if GitHub release already exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.pkg.outputs.version }}" >/dev/null 2>&1; then
+            echo "create=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "create=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create GitHub release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_release.outputs.create == 'true'
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
-          tag: ${{ env.PACKAGE_VERSION }}
-          commit: main
-          body: ${{ env.COMMIT_LOG }}
+          tag: ${{ steps.pkg.outputs.version }}
+          commit: ${{ github.sha }} # pin the tag to the built commit, not the current tip of main
+          body: ${{ steps.changelog.outputs.body }}
       - name: npm publish
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_npm.outputs.publish == 'true'
         run: npm publish # OIDC trusted publishing — no NODE_AUTH_TOKEN needed
