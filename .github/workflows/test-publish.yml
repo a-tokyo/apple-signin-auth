@@ -1,11 +1,14 @@
 name: Test Release Publish
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+  contents: write # create GitHub releases/tags
+  id-token: write # OIDC token for npm trusted publishing
 
 jobs:
   test:
@@ -20,15 +23,15 @@ jobs:
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ubuntu-latest-node-24.x-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ubuntu-latest-node-20.18-yarn-
+            ubuntu-latest-node-24.x-yarn-
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '20.18'
+          node-version: '24.x'
           registry-url: https://registry.npmjs.org/
       - name: Install
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Test
         run: yarn test --ci --bail
       - name: Test TypeScript Type Definitions
@@ -44,39 +47,40 @@ jobs:
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      - name: Get yarn cache
-        id: yarn-cache
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ubuntu-latest-node-20.18-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ubuntu-latest-node-20.18-yarn-
+          fetch-depth: 0 # full history so git describe/tag lookups work
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '20.18'
+          node-version: '24.x' # ships npm >= 11.5.1, required for OIDC trusted publishing
           registry-url: https://registry.npmjs.org/
+          package-manager-cache: false # never cache in release builds
       - name: Install
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Build
         run: NODE_ENV=production yarn build
       - name: Setup env vars
         id: ownEnvVars
         run: |
-          # Set PACKAGE_VERSION
           PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          # Set COMMIT_LOG
-          COMMIT_LOG=`git log $(git describe --tags --abbrev=0)..HEAD --format='%s - %an'`
-          echo "COMMIT_LOG=$COMMIT_LOG" >> $GITHUB_ENV
-      - uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+          echo "COMMIT_LOG<<EOF" >> $GITHUB_ENV
+          git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --format='- %s (%an)' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Check if version already released
+        id: check_tag
+        run: |
+          if git rev-parse "refs/tags/${{ env.PACKAGE_VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Create GitHub release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
-          # token: ${{ secrets.GITHUB_TOKEN }} # no need for personal token
           tag: ${{ env.PACKAGE_VERSION }}
           commit: main
           body: ${{ env.COMMIT_LOG }}
       - name: npm publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.check_tag.outputs.exists == 'false'
+        run: npm publish # OIDC trusted publishing — no NODE_AUTH_TOKEN needed
