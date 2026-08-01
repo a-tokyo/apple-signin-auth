@@ -68,7 +68,7 @@
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-ft-flow": "^3.0.0",
-    "flow-bin": "^0.317.0",
+    "flow-bin": "^0.324.0",
     "flow-copy-source": "^2.0.9",
     "globals": "^16.0.0",
     "husky": "^9.0.0",
